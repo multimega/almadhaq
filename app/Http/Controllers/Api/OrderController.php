@@ -804,8 +804,7 @@ class OrderController extends Controller
                 }
                 //Sending Email To Admin
                 if ($gs->is_smtp == 1) {
-                    $msg = "Hello Admin!<br> Your store has recieved a new order. <br> Order Number is " . $order->order_number . " <br> Customer name : " . $order->customer_name . "<br>Customer Email : " .
-                        $order->customer_email . "<br>Customer phone : " . $order->customer_phone . "<br> Please login to your panel to check. <br>Thank you.";
+                    $msg = "Hello Admin!<br> Your store has recieved a new order. <br> Order Number is " . $order->order_number . " <br> Customer name : " . $order->customer_name . "<br>Customer phone : " . $order->customer_phone . "<br> Please login to your panel to check. <br>Thank you.";
                     $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
                     $data = [
                         'to' => $gs->email,
@@ -818,8 +817,7 @@ class OrderController extends Controller
                 } else {
                     $to = $gs->email;
                     $subject = "New Order Recieved!!";
-                    $msg = "Hello Admin!\nYour store has recieved a new order.\nOrder Number is " . $order->order_number . "\nCustomer name : " . $order->customer_name . "\nCustomer Email : " .
-                        $order->customer_email . "\nCustomer phone : " . $order->customer_phone . "\nPlease login to your panel to check. \nThank you.";
+                    $msg = "Hello Admin!\nYour store has recieved a new order.\nOrder Number is " . $order->order_number . "\nCustomer name : " . $order->customer_name . "\nCustomer phone : " . $order->customer_phone . "\nPlease login to your panel to check. \nThank you.";
                     $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
                     mail($to, $subject, $msg, $headers);
                 }

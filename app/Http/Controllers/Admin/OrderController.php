@@ -82,7 +82,7 @@ class OrderController extends Controller
         } else {
             $datas = Order::orderBy('id', 'desc')->where('order_completed', 1)->get();
         }
-        
+
         return Datatables::of($datas)
             ->editColumn('id', function (Order $data) {
                 $id = '<a href="' . route('admin-order-invoice', $data->id) . '">' . $data->order_number . '</a>';
@@ -97,9 +97,9 @@ class OrderController extends Controller
                 return $id;
             })
             ->editColumn('created_at', function (Order $data) {
-                    return $data->created_at
-                        ->format('d/m/Y h:i A');     // 12-hour format with AM/PM
-                })
+                return $data->created_at
+                    ->format('d/m/Y h:i A');     // 12-hour format with AM/PM
+            })
 
 
             ->editColumn('pay_amount', function (Order $data) {
@@ -107,7 +107,7 @@ class OrderController extends Controller
             })
             ->addColumn('action', function (Order $data) {
                 $orders = '<a href="javascript:;" data-href="' . route('admin-order-edit', $data->id) . '" class="delivery" data-bs-toggle="modal" data-bs-target="#modal1"><i class="fas fa-dollar-sign"></i> Delivery Status</a>';
-                return '<div class="godropdown"><button class="go-dropdown-toggle"> Actions<i class="fas fa-chevron-down"></i></button><div class="action-list"><a href="' . route('admin-order-show', $data->id) . '" > <i class="fas fa-eye"></i> Details</a>  <a href="javascript:;" data-href="' . route('admin-order-delete', $data->id) . '" data-bs-toggle="modal" data-bs-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i> Delete</a>      <a href="javascript:;" class="send" data-email="' . $data->customer_email . '" data-bs-toggle="modal" data-bs-target="#vendorform"><i class="fas fa-envelope"></i> Send</a><a href="javascript:;" data-href="' . route('admin-order-track', $data->id) . '" class="track" data-bs-toggle="modal" data-bs-target="#modal1"><i class="fas fa-truck"></i> Track Order</a>' . $orders . '</div></div>';
+                return '<div class="godropdown"><button class="go-dropdown-toggle"> Actions<i class="fas fa-chevron-down"></i></button><div class="action-list"><a href="' . route('admin-order-show', $data->id) . '" > <i class="fas fa-eye"></i> Details</a>  <a href="javascript:;" data-href="' . route('admin-order-delete', $data->id) . '" data-bs-toggle="modal" data-bs-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i> Delete</a>      <a href="javascript:;" class="send" data-email="' . $data->customer_phone . '" data-bs-toggle="modal" data-bs-target="#vendorform"><i class="fas fa-envelope"></i> Send</a><a href="javascript:;" data-href="' . route('admin-order-track', $data->id) . '" class="track" data-bs-toggle="modal" data-bs-target="#modal1"><i class="fas fa-truck"></i> Track Order</a>' . $orders . '</div></div>';
             })
             ->rawColumns(['id', 'user_id', 'action'])
             ->toJson();
@@ -270,7 +270,7 @@ class OrderController extends Controller
 
         if ($input['status'] == "processing") {
 
-                    $gs = Generalsetting::findOrFail(1);
+            $gs = Generalsetting::findOrFail(1);
 
             if ($data->shipment_id == 3) {
 
@@ -463,7 +463,7 @@ class OrderController extends Controller
                                     "PhoneNumber2Ext" => "",
                                     "FaxNumber" => "",
                                     "CellPhone" => "9677956000200",
-                                    "EmailAddress" => $order->customer_email,
+                                    "EmailAddress" => $order->customer_phone,
                                     "Type" => ""
                                 ),
                             ),
@@ -889,9 +889,9 @@ class OrderController extends Controller
 
                 return view('admin.order.details', compact('m', 'order', 'cart'));
             }
-            
+
             $cart = unserialize(bzdecompress(utf8_decode($order->cart)));
-            
+
             Mail::to($gs->inventory_email)->send(new OrderEmail($order, $cart));
         }
 
@@ -1012,7 +1012,7 @@ class OrderController extends Controller
                                         "PhoneNumber2Ext" => "",
                                         "FaxNumber" => "",
                                         "CellPhone" => "9677956000200",
-                                        "EmailAddress" => $order->customer_email,
+                                        "EmailAddress" => $order->customer_phone,
                                         "Type" => ""
                                     ),
                                 ),
@@ -1379,7 +1379,7 @@ class OrderController extends Controller
                 $gs = Generalsetting::findOrFail(1);
                 if ($gs->is_smtp == 1) {
                     $maildata = [
-                        'to' => $data->customer_email,
+                        'to' => $data->customer_phone,
                         'subject' => 'Your order ' . $data->order_number . ' is Confirmed!',
                         'body' => "Hello " . $data->customer_name . "," . "\n Thank you for shopping with us. We are looking forward to your next visit.",
                     ];
@@ -1387,7 +1387,7 @@ class OrderController extends Controller
                     $mailer = new GeniusMailer();
                     $mailer->sendCustomMail($maildata);
                 } else {
-                    $to = $data->customer_email;
+                    $to = $data->customer_phone;
                     $subject = 'Your order ' . $data->order_number . ' is Confirmed!';
                     $msg = "Hello " . $data->customer_name . "," . "\n Thank you for shopping with us. We are looking forward to your next visit.";
                     $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
@@ -1412,26 +1412,26 @@ class OrderController extends Controller
                 $gs = Generalsetting::findOrFail(1);
                 if ($gs->is_smtp == 1) {
                     $maildata = [
-                        'to' => $data->customer_email,
+                        'to' => $data->customer_phone,
                         'subject' => 'Your order ' . $data->order_number . ' is Declined!',
                         'body' => "Hello " . $data->customer_name . "," . "\n We are sorry for the inconvenience caused. We are looking forward to your next visit.",
                     ];
                     $mailer = new GeniusMailer();
                     $mailer->sendCustomMail($maildata);
                 } else {
-                    $to = $data->customer_email;
+                    $to = $data->customer_phone;
                     $subject = 'Your order ' . $data->order_number . ' is Declined!';
                     $msg = "Hello " . $data->customer_name . "," . "\n We are sorry for the inconvenience caused. We are looking forward to your next visit.";
                     $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
                     mail($to, $subject, $msg, $headers);
                 }
             }
-            
+
             // dd($input);
 
             $order->update($input);
             if ($request->status) {
-                
+
                 $title = ucwords($request->status);
                 $ck = OrderTrack::where('order_id', '=', $id)->where('title', '=', $title)->first();
                 if ($ck) {
@@ -1466,9 +1466,7 @@ class OrderController extends Controller
 
 
 
-    public function createShipmentMethod()
-    {
-    }
+    public function createShipmentMethod() {}
 
     public function pending()
     {
@@ -1493,27 +1491,26 @@ class OrderController extends Controller
         $lang = $this->getLang();
         return view('admin.order.details', compact('order', 'cart', 'lang'));
     }
-    
+
     public function updateField(Request $request, $orderId)
     {
         $request->validate([
             'field' => 'required|in:customer_address,order_note,shipping_address',
             'value' => 'nullable|string|max:1000'
         ]);
-    
+
         try {
             $order = Order::findOrFail($orderId);
-            
+
             $field = $request->input('field');
             $value = $request->input('value');
-            
+
             $order->update([$field => $value]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => __('Field updated successfully')
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -2086,7 +2083,7 @@ class OrderController extends Controller
                             })
                             ->addColumn('action', function(Order $data) {
                                 $orders = '<a href="javascript:;" data-href="'. route('admin-order-edit',$data->id) .'" class="delivery" data-bs-toggle="modal" data-bs-target="#modal1"><i class="fas fa-dollar-sign"></i> Delivery Status</a>';
-                                return '<div class="godropdown"><button class="go-dropdown-toggle"> Actions<i class="fas fa-chevron-down"></i></button><div class="action-list"><a href="' . route('admin-order-show',$data->id) . '" > <i class="fas fa-eye"></i> Details</a><a href="javascript:;" class="send" data-email="'. $data->customer_email .'" data-bs-toggle="modal" data-bs-target="#vendorform"><i class="fas fa-envelope"></i> Send</a><a href="javascript:;" data-href="'. route('admin-order-track',$data->id) .'" class="track" data-bs-toggle="modal" data-bs-target="#modal1"><i class="fas fa-truck"></i> Track Order</a>'.$orders.'</div></div>';
+                                return '<div class="godropdown"><button class="go-dropdown-toggle"> Actions<i class="fas fa-chevron-down"></i></button><div class="action-list"><a href="' . route('admin-order-show',$data->id) . '" > <i class="fas fa-eye"></i> Details</a><a href="javascript:;" class="send" data-email="'. $data->customer_phone .'" data-bs-toggle="modal" data-bs-target="#vendorform"><i class="fas fa-envelope"></i> Send</a><a href="javascript:;" data-href="'. route('admin-order-track',$data->id) .'" class="track" data-bs-toggle="modal" data-bs-target="#modal1"><i class="fas fa-truck"></i> Track Order</a>'.$orders.'</div></div>';
                             }) 
                 ->rawColumns(['action', 'id', 'user_id', 'pay_amount'])
                 ->make(true);

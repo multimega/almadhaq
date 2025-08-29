@@ -170,19 +170,19 @@
                                                 </h5>
                                                 <div class="row">
                                                     <!--<div class="col-lg-12 mb-2 {{ $digital == 1 ? 'd-none' : '' }}">
-                         <select class="form-control" id="shipop" name="shipping" required="">
-                       
-                       @if ($gs->allow_shipto == 1)
+                                     <select class="form-control" id="shipop" name="shipping" required="">
+                                   
+                                   @if ($gs->allow_shipto == 1)
     <option value="shipto">{{ $langg->lang149 }}</option>
     @endif
-                        
-                         @if ($gs->allow_pickup == 1)
+                                    
+                                     @if ($gs->allow_pickup == 1)
     <option value="pickup">{{ $langg->lang150 }}</option>
     @endif
-                       
-                       
-                         </select>
-                        </div>-->
+                                   
+                                   
+                                     </select>
+                                    </div>-->
 
                                                     <div class="col-lg-6 d-none mb-2" id="shipshow">
                                                         <select class="form-control nice" name="pickup_location">
@@ -483,74 +483,74 @@
 
 
                                                     <!--		<div class="col-lg-6">
-                         <input class="form-control" type="text" name="company_name"
-                          placeholder="company name" required=""
-                          value="{{ Auth::guard('web')->check() ? Auth::guard('web')->user()->company_name : '' }}">
-                        </div>-->
+                                     <input class="form-control" type="text" name="company_name"
+                                      placeholder="company name" required=""
+                                      value="{{ Auth::guard('web')->check() ? Auth::guard('web')->user()->company_name : '' }}">
+                                    </div>-->
 
                                                     <!-- Do You Have Domain -->
                                                     <!--					<div class="col-lg-6">	<label >
-                    Do You Have Domain ?
-                    
-                    </label> </div>
-                     <div class="col-lg-6">
-                     
-                     
-                    <div class="radio-design">
-                    <input type="radio" class="is_domain" id="free-package0" name="is_domain" value="yes"   required>
-                    <span class="checkmark"></span>
-                    <label for="free-package0">
-                    Yes
-                    <small> Write Domain Name Please	</small>
-                    </label>
-                    </div>
-                    <input  id="domain_name" class="form-control d-none" type="text" name="domain_name"
-                          placeholder="Domain name"
-                          value="">
-                    <div class="radio-design">
-                    <input type="radio" class="is_domain" id="free-package00" name="is_domain" value="no"   required>
-                    <span class="checkmark"></span>
-                    <label for="free-package00">
-                    No
-                    
-                    </label>
-                    </div>
-                    
-                    
-                    
-                    </div>-->
+                                Do You Have Domain ?
+                                
+                                </label> </div>
+                                 <div class="col-lg-6">
+                                 
+                                 
+                                <div class="radio-design">
+                                <input type="radio" class="is_domain" id="free-package0" name="is_domain" value="yes"   required>
+                                <span class="checkmark"></span>
+                                <label for="free-package0">
+                                Yes
+                                <small> Write Domain Name Please	</small>
+                                </label>
+                                </div>
+                                <input  id="domain_name" class="form-control d-none" type="text" name="domain_name"
+                                      placeholder="Domain name"
+                                      value="">
+                                <div class="radio-design">
+                                <input type="radio" class="is_domain" id="free-package00" name="is_domain" value="no"   required>
+                                <span class="checkmark"></span>
+                                <label for="free-package00">
+                                No
+                                
+                                </label>
+                                </div>
+                                
+                                
+                                
+                                </div>-->
                                                     <!-- End Do You Have Domain-->
 
                                                     <!--Add Domain-->
                                                     <!--		<hr style="margin-top: 5rem;"><br>
-                    <div class="col-lg-6 add-domain d-none">	<label >
-                    Do You Want Add Domain ?
-                    
-                    </label> </div>
-                     <div class="col-lg-6 add-domain d-none">
-                     
-                     
-                    <div class="radio-design">
-                    <input type="radio" class="add_domain" id="free-package000" name="add_domain" value="yes"   >
-                    <span class="checkmark"></span>
-                    <label for="free-package000">
-                    Yes
-                    <small> Gona Add Domain To Package	</small>
-                    </label>
-                    </div>
-                    
-                    <div class="radio-design">
-                    <input type="radio" class="add_domain" id="free-package0000" name="add_domain" value="no"   >
-                    <span class="checkmark"></span>
-                    <label for="free-package0000">
-                    No
-                    
-                    </label>
-                    </div>
-                    
-                    
-                    
-                    </div>	-->
+                                <div class="col-lg-6 add-domain d-none">	<label >
+                                Do You Want Add Domain ?
+                                
+                                </label> </div>
+                                 <div class="col-lg-6 add-domain d-none">
+                                 
+                                 
+                                <div class="radio-design">
+                                <input type="radio" class="add_domain" id="free-package000" name="add_domain" value="yes"   >
+                                <span class="checkmark"></span>
+                                <label for="free-package000">
+                                Yes
+                                <small> Gona Add Domain To Package	</small>
+                                </label>
+                                </div>
+                                
+                                <div class="radio-design">
+                                <input type="radio" class="add_domain" id="free-package0000" name="add_domain" value="no"   >
+                                <span class="checkmark"></span>
+                                <label for="free-package0000">
+                                No
+                                
+                                </label>
+                                </div>
+                                
+                                
+                                
+                                </div>	-->
                                                     <!-- End Add Domain-->
 
 
@@ -645,7 +645,7 @@
                                                                     <span id="color-bar"
                                                                         style="border: 10px solid {{ $product['color'] == ''
                                                                             ? "
-                                                                                                                                                                                                                                                                                    white"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            white"
                                                                             : '#' . $product['color'] }};"></span>
                                                                 </div>
                                                             @endif
@@ -911,21 +911,21 @@
                                                         @endif
                                                         @endif --}}
                                                             <!--  	<a class="nav-link payment" data-val="" data-show="no" data-form="{{ route('group.submit') }}" data-href="{{ route('front.load.payment', ['slug1' => 'bank', 'slug2' => 0]) }}" id="v-pills-tab3-tab" data-toggle="pill" href="#v-pills-tab3" role="tab" aria-controls="v-pills-tab3" aria-selected="false">
-                             <div class="icon">
-                               <span class="radio"></span>
-                             </div>
-                             <p>
-                               Bank Transfer
+                                         <div class="icon">
+                                           <span class="radio"></span>
+                                         </div>
+                                         <p>
+                                           Bank Transfer
 
-                              @if ($gs->cod_text != null)
+                                          @if ($gs->cod_text != null)
     <br>
-                              <large>
-                                Account Number : 000000
-                              </large>
+                                          <large>
+                                            Account Number : 000000
+                                          </large>
     @endif
 
-                             </p>
-                           </a>-->
+                                         </p>
+                                       </a>-->
                                                             @if ($gs->is_instamojo == 1)
                                                                 <a class="nav-link payment" data-val="" data-show="no"
                                                                     data-form="{{ route('instamojo.submit') }}"
@@ -2736,12 +2736,7 @@
 
                 });
             });
-            @endif
-            @endif
 
-
-                *
-                /
             $("Select[name='shipping_country']").change(function() {
 
                 var id = $(this).val();
