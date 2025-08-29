@@ -214,10 +214,6 @@
                     name: 'user_id'
                 },
                 {
-                    data: 'customer_name',
-                    name: 'customer_name'
-                },
-                {
                     data: 'id',
                     name: 'id'
                 },
@@ -229,7 +225,6 @@
                     data: 'totalQty',
                     name: 'totalQty'
                 },
-
                 {
                     data: 'pay_amount',
                     name: 'pay_amount'
