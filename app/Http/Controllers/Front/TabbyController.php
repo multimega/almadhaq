@@ -218,7 +218,7 @@ class TabbyController extends Controller
         $order['customer_address'] = $request->address;
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;

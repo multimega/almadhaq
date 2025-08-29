@@ -1992,7 +1992,7 @@ class OrderController extends Controller
 
 
                     $input['customer_name'] =  !empty($line[9]) ? $line[9] : null;
-                    $input['customer_email'] =  !empty($line[10]) ? $line[10] : null;
+
                     $input['customer_phone'] =  !empty($line[11]) ? $line[11] : null;
                     $input['customer_country'] =  !empty($line[12]) ? $line[12] : "Egypt";
                     $input['customer_city'] =  !empty($line[13]) ? $line[13] : null;
