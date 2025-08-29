@@ -9,7 +9,7 @@
     <div class="customer-details" style="width:50%;float: left">
         <h4 style="font-size: 20px;color: #000;margin-bottom: 12px">تفاصيل الفواتير</h4>
         <ul style="padding: 0; list-style: none">
-            <li style="color: #000;margin-left: 0"><strong style="font-size: 15px;">البريد الإلكتروني:</strong> {{ $order->customer_email }}</li>
+            <li style="color: #000;margin-left: 0"><strong style="font-size: 15px;">الهاتف:</strong> {{ $order->customer_phone }}</li>
             <li style="color: #000;margin-left: 0"><strong style="font-size: 15px;">الاسم:</strong> {{ $order->customer_name }}</li>
             <li style="color: #000;margin-left: 0"><strong style="font-size: 15px;">الدولة:</strong> {{ $order->customer_country }}</li>
             <li style="color: #000;margin-left: 0"><strong style="font-size: 15px;">الهاتف:</strong> {{ $order->customer_phone }}</li>

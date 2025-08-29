@@ -163,7 +163,7 @@
                ajax: '{{ route('admin-order-datatables','completed') }}',
                columns: [
                       { data: 'user_id', name: 'user_id' },
-                        { data: 'customer_email', name: 'customer_email' },
+                        { data: 'customer_name', name: 'customer_name' },
                         { data: 'id', name: 'id' },
                         { data: 'totalQty', name: 'totalQty' },
                         { data: 'pay_amount', name: 'pay_amount' },

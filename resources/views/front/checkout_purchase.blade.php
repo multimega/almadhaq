@@ -74,7 +74,6 @@ $lang  = DB::table('languages')->where('is_default','=',1)->first();
                                                                     <h5>{{ $langg->lang287 }}</h5>
                                                                     <address>
                                                                         {{ $langg->lang288 }} {{$order->customer_name}}<br>
-                                                                        {{ $langg->lang289 }} {{$order->customer_email}}<br>
                                                                         {{ $langg->lang290 }} {{$order->customer_phone}}<br>
                                                                         {{ $langg->lang291 }} {{$order->customer_address}}<br>
                                                                         {{$order->customer_city}}-{{$order->customer_zip}}
@@ -104,7 +103,6 @@ $lang  = DB::table('languages')->where('is_default','=',1)->first();
                                                                         <h5>{{ $langg->lang302 }}</h5>
                                                                         <address>
                                                                             {{ $langg->lang288 }} {{$order->shipping_name == null ? $order->customer_name : $order->shipping_name}}<br>
-                                                                            {{ $langg->lang289 }} {{$order->shipping_email == null ? $order->customer_email : $order->shipping_email}}<br>
                                                                             {{ $langg->lang290 }} {{$order->shipping_phone == null ? $order->customer_phone : $order->shipping_phone}}<br>
                                                                             {{ $langg->lang291 }} {{$order->shipping_address == null ? $order->customer_address : $order->shipping_address}}<br>
                                                                              {{$order->shipping_city == null ? $order->customer_city : $order->shipping_city}}-{{$order->shipping_zip == null ? $order->customer_zip : $order->shipping_zip}}
@@ -133,7 +131,6 @@ $lang  = DB::table('languages')->where('is_default','=',1)->first();
                                                                     <h5>{{ $langg->lang287 }}</h5>
                                                                     <address>
                                                                         {{ $langg->lang288 }} {{$order->customer_name}}<br>
-                                                                        {{ $langg->lang289 }} {{$order->customer_email}}<br>
                                                                         {{ $langg->lang290 }} {{$order->customer_phone}}<br>
                                                                         {{ $langg->lang291 }} {{$order->customer_address}}<br>
                                                                         {{$order->customer_city}}-{{$order->customer_zip}}

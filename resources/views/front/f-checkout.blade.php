@@ -76,7 +76,7 @@ $vapulus=  App\Models\PaymentGateway::where('status','=',1)->find(14);
 													<input type="text" id="personal-name" class="form-control" name="personal_name" placeholder="{{ $langg->lang747 }}" value="{{ Auth::check() ? Auth::user()->name : '' }}" {!! Auth::check() ? 'readonly' : '' !!}>
 												</div>
 												<div class="col-lg-6">
-													<input type="email" id="personal-email" class="form-control" name="personal_email" placeholder="{{ $langg->lang748 }}" value="{{ Auth::check() ? Auth::user()->email : '' }}"  {!! Auth::check() ? 'readonly' : '' !!}>
+													<input type="text" id="personal-phone" class="form-control" name="personal_phone" placeholder="{{ $langg->lang184 }}" value="{{ Auth::check() ? Auth::user()->phone : '' }}"  {!! Auth::check() ? 'readonly' : '' !!}>
 												</div>
 											</div>
 											@if(!Auth::check())
@@ -593,9 +593,7 @@ $vapulus=  App\Models\PaymentGateway::where('status','=',1)->find(14);
 														<li>
 															<p id="shipping_phone"></p>
 														</li>
-														<li>
-															<p id="shipping_email"></p>
-														</li>
+
 													</ul>
 											</div>
 											<div class="payment-information shipment">
@@ -1344,7 +1342,7 @@ $vapulus=  App\Models\PaymentGateway::where('status','=',1)->find(14);
 				            <form id="loginform" action="{{ route('user.login.submit') }}" method="POST">
 				              {{ csrf_field() }}
 				              <div class="form-input">
-				                <input type="email" name="email" placeholder="{{ $langg->lang173 }}" required="">
+				                <input type="text" name="name" placeholder="{{ $langg->lang173 }}" required="">
 				                <i class="icofont-user-alt-5"></i>
 				              </div>
 				              <div class="form-input">
@@ -1404,11 +1402,6 @@ $vapulus=  App\Models\PaymentGateway::where('status','=',1)->find(14);
                             <div class="form-input">
                                 <input type="text" class="User Name" name="name" placeholder="{{ $langg->lang182 }}" required="">
                                 <i class="icofont-user-alt-5"></i>
-                            </div>
-
-                            <div class="form-input">
-                                <input type="email" class="User Name" name="email" placeholder="{{ $langg->lang183 }}" required="">
-                                <i class="icofont-email"></i>
                             </div>
 
                             <div class="form-input">
@@ -1904,12 +1897,12 @@ var ck = 0;
 		var shipping_user  = !$('input[name="shipping_name"]').val() ? $('input[name="name"]').val() : $('input[name="shipping_name"]').val();
 		var shipping_location  = !$('input[name="shipping_address"]').val() ? $('input[name="address"]').val() : $('input[name="shipping_address"]').val();
 		var shipping_phone = !$('input[name="shipping_phone"]').val() ? $('input[name="phone"]').val() : $('input[name="shipping_phone"]').val();
-		var shipping_email= !$('input[name="shipping_email"]').val() ? $('input[name="email"]').val() : $('input[name="shipping_email"]').val();
+		var shipping_name= !$('input[name="shipping_name"]').val() ? $('input[name="name"]').val() : $('input[name="shipping_name"]').val();
 
 		$('#shipping_user').html('<i class="fas fa-user"></i>'+shipping_user);
 		$('#shipping_location').html('<i class="fas fas fa-map-marker-alt"></i>'+shipping_location);
 		$('#shipping_phone').html('<i class="fas fa-phone"></i>'+shipping_phone);
-		$('#shipping_email').html('<i class="fas fa-envelope"></i>'+shipping_email);
+
 
 		$('#pills-step1-tab').addClass('active');
 		$('#pills-step2-tab').addClass('active');

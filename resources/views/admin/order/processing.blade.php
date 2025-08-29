@@ -158,7 +158,7 @@
                serverSide: true,
                ajax: '{{ route('admin-order-datatables','processing') }}',
                columns: [
-                        { data: 'customer_email', name: 'customer_email' },
+                        { data: 'customer_name', name: 'customer_name' },
                         { data: 'id', name: 'id' },
                         { data: 'totalQty', name: 'totalQty' },
                         { data: 'pay_amount', name: 'pay_amount' },

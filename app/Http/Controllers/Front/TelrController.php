@@ -59,16 +59,16 @@ class TelrController extends Controller
     public function submit(Request $request)
     {
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -210,7 +210,7 @@ class TelrController extends Controller
         $order['method'] = "Credit/Debit Card";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -346,7 +346,6 @@ class TelrController extends Controller
             'bill_region' => $request->state ?? '',
             'bill_country' => $countryCode,
             'bill_zip' => $request->postal_code ?? '',
-            'bill_email' => $request->personal_email ?? '',
             'bill_phone' => $request->phone ?? '',
 
             'ivp_lang' => $language->sign,
@@ -532,7 +531,7 @@ class TelrController extends Controller
         $gs = Generalsetting::findOrFail(1);
         //Sending Email To Buyer
         if ($gs->is_smtp == 1) {
-            if (!empty($request->personal_email)) {
+            /*if (!empty($request->personal_email)) {
                 $msg = "Hello " . $request->personal_name . "!<br> You have placed a new order.<br>Your order number is " . $order->order_number . ".Please wait for your delivery. <br>Thank you.";
                 $msgs = '<html><body>';
                 $msgs = '<table rules="all" style="border-color: #666;" cellpadding="10">';
@@ -554,12 +553,11 @@ class TelrController extends Controller
                 $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
                 mail($to, $subject, $msg, $headers);
             }
-        }
+        }*/
 
         //Sending Email To Admin
         if ($gs->is_smtp == 1) {
-            $msg = "Hello Admin!<br> Your store has recieved a new order. <br> Order Number is " . $order->order_number . " <br> Customer name : " . $order->customer_name . "<br>Customer Email : " .
-                $order->customer_email . "<br>Customer phone : " . $order->customer_phone . "<br> Please login to your panel to check. <br>Thank you.";
+            $msg = "Hello Admin!<br> Your store has recieved a new order. <br> Order Number is " . $order->order_number . " <br> Customer name : " . $order->customer_name . "<br>Customer phone : " . $order->customer_phone . "<br> Please login to your panel to check. <br>Thank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             $data = [
                 'to' => $gs->email,
@@ -572,8 +570,7 @@ class TelrController extends Controller
         } else {
             $to = $gs->email;
             $subject = "New Order Recieved!!";
-            $msg = "Hello Admin!\nYour store has recieved a new order.\nOrder Number is " . $order->order_number . "\nCustomer name : " . $order->customer_name . "\nCustomer Email : " .
-                $order->customer_email . "\nCustomer phone : " . $order->customer_phone . "\nPlease login to your panel to check. \nThank you.";
+            $msg = "Hello Admin!\nYour store has recieved a new order.\nOrder Number is " . $order->order_number . "\nCustomer name : " . $order->customer_name . "\nCustomer phone : " . $order->customer_phone . "\nPlease login to your panel to check. \nThank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             mail($to, $subject, $msg, $headers);
         }

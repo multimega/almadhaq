@@ -9,20 +9,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-        use HasApiTokens, Notifiable;
-        use SoftDeletes;
+    use HasApiTokens, Notifiable;
+    use SoftDeletes;
 
 
-    protected $fillable = ['name', 'photo', 'zip', 'ref', 'residency', 'city', 'refunds','weight', 'height', 'gender', 'points', 'message', 'code', 'message_ar', 'country', 'address', 'phone', 'fax', 'email','password','email_verified','is_provider','affilate_code','verification_link','shop_name','owner_name','shop_number','shop_address','reg_number','shop_message','is_vendor','shop_details','shop_image','f_url','g_url','t_url','l_url','f_check','g_check','t_check','l_check','shipping_cost','date','mail_sent'];
+    protected $fillable = ['name', 'photo', 'zip', 'ref', 'residency', 'city', 'refunds', 'weight', 'height', 'gender', 'points', 'message', 'code', 'message_ar', 'country', 'address', 'phone', 'fax', 'password', 'is_provider', 'affilate_code', 'verification_link', 'shop_name', 'owner_name', 'shop_number', 'shop_address', 'reg_number', 'shop_message', 'is_vendor', 'shop_details', 'shop_image', 'f_url', 'g_url', 't_url', 'l_url', 'f_check', 'g_check', 't_check', 'l_check', 'shipping_cost', 'date', 'mail_sent'];
 
 
     protected $hidden = [
-        'password', 'remember_token'
+        'password',
+        'remember_token'
     ];
 
-    public function IsVendor(){
+    public function IsVendor()
+    {
         if ($this->is_vendor == 2) {
-           return true;
+            return true;
         }
         return false;
     }
@@ -30,7 +32,7 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany('App\Models\Order');
-    } 
+    }
     public function address()
     {
         return $this->hasMany('App\Models\Address');
@@ -90,17 +92,17 @@ class User extends Authenticatable
 
     public function senders()
     {
-        return $this->hasMany('App\Models\Conversation','sent_user');
+        return $this->hasMany('App\Models\Conversation', 'sent_user');
     }
 
     public function recievers()
     {
-        return $this->hasMany('App\Models\Conversation','recieved_user');
+        return $this->hasMany('App\Models\Conversation', 'recieved_user');
     }
 
     public function notivications()
     {
-        return $this->hasMany('App\Models\UserNotification','user_id');
+        return $this->hasMany('App\Models\UserNotification', 'user_id');
     }
 
     public function subscribes()
@@ -115,56 +117,58 @@ class User extends Authenticatable
 
     public function vendororders()
     {
-        return $this->hasMany('App\Models\VendorOrder','user_id');
+        return $this->hasMany('App\Models\VendorOrder', 'user_id');
     }
 
     public function shippings()
     {
-        return $this->hasMany('App\Models\Shipping','user_id');
+        return $this->hasMany('App\Models\Shipping', 'user_id');
     }
 
     public function packages()
     {
-        return $this->hasMany('App\Models\Package','user_id');
+        return $this->hasMany('App\Models\Package', 'user_id');
     }
 
     public function reports()
     {
-        return $this->hasMany('App\Models\Report','user_id');
+        return $this->hasMany('App\Models\Report', 'user_id');
     }
 
     public function verifies()
     {
-        return $this->hasMany('App\Models\Verification','user_id');
+        return $this->hasMany('App\Models\Verification', 'user_id');
     }
 
     public function checkVerification()
     {
-        return count($this->verifies) > 0 ? 
-        (empty($this->verifies()->where('admin_warning','=','0')->orderBy('id','desc')->first()->status) ? false : ($this->verifies()->orderBy('id','desc')->first()->status == 'Pending' ? true : false)) : false;
+        return count($this->verifies) > 0 ?
+            (empty($this->verifies()->where('admin_warning', '=', '0')->orderBy('id', 'desc')->first()->status) ? false : ($this->verifies()->orderBy('id', 'desc')->first()->status == 'Pending' ? true : false)) : false;
     }
 
     public function checkStatus()
     {
-        return count($this->verifies) > 0 ? ($this->verifies()->orderBy('id','desc')->first()->status == 'Verified' ? true : false) :false;
+        return count($this->verifies) > 0 ? ($this->verifies()->orderBy('id', 'desc')->first()->status == 'Verified' ? true : false) : false;
     }
 
     public function checkWarning()
     {
-        return count($this->verifies) > 0 ? ( empty( $this->verifies()->where('admin_warning','=','1')->orderBy('id','desc')->first() ) ? false : (empty($this->verifies()->where('admin_warning','=','1')->orderBy('id','desc')->first()->status) ? true : false) ) : false;
+        return count($this->verifies) > 0 ? (empty($this->verifies()->where('admin_warning', '=', '1')->orderBy('id', 'desc')->first()) ? false : (empty($this->verifies()->where('admin_warning', '=', '1')->orderBy('id', 'desc')->first()->status) ? true : false)) : false;
     }
 
     public function displayWarning()
     {
-        return $this->verifies()->where('admin_warning','=','1')->orderBy('id','desc')->first()->warning_reason;
+        return $this->verifies()->where('admin_warning', '=', '1')->orderBy('id', 'desc')->first()->warning_reason;
     }
-    
-    
-      public function AauthAcessToken(){
+
+
+    public function AauthAcessToken()
+    {
         return $this->hasMany('App\Models\OauthAccessToken');
     }
-    
-    public function scopeCreateAcessToken(){
+
+    public function scopeCreateAcessToken()
+    {
         $this->AauthAcessToken()->delete();
         return $this->createToken('MyApp')->accessToken;
     }
@@ -174,6 +178,4 @@ class User extends Authenticatable
         $data = self::where('id', '=', $id)->first();
         return ($data ? $data : false);
     }
-
-
 }

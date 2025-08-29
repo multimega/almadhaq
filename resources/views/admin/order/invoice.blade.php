@@ -98,7 +98,7 @@
                         <div class="invoice__shipping">
                             <p><strong>{{ __('Shipping Address') }}</strong></p>
                            <span><strong>{{ __('Customer Name') }}</strong>: {{ $order->shipping_name == null ? $order->customer_name : $order->shipping_name}}</span><br>
-                           <span><strong>{{ __('Customer Email') }}</strong>: {{ $order->shipping_email == null ? $order->customer_email : $order->shipping_email}}</span><br>
+
                            <span><strong>{{ __('Customer Phone') }}</strong>: {{ $order->shipping_phone == null ? $order->customer_phone : $order->shipping_phone}}</span><br>
                            <span><strong>{{ __('Address') }}</strong>: {{ $order->shipping_address == null ? $order->customer_address : $order->shipping_address }}</span><br>
                            

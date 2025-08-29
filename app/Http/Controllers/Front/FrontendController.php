@@ -162,7 +162,7 @@ class FrontendController extends Controller
     $ps = DB::table('pagesettings')->find(1);
     $feature_products =  Product::where('featured', '=', 1)->where('status', '=', 1)->orderBy('id', 'desc')->take(8)->get();
     $fix_banners = DB::table('banners')->where('type', '=', 'Fix')->get();
-    
+
     $services = DB::table('services')->where('user_id', '=', 0)->get();
     $bottom_small_banners = DB::table('banners')->where('type', '=', 'BottomSmall')->get();
     $large_banners = DB::table('banners')->where('type', '=', 'Large')->get();
@@ -704,168 +704,169 @@ class FrontendController extends Controller
     $brand = Brand::where('slug', $slug)->orwhere('slug_ar', $slug)->where('status', 1)->first();
 
     $products  = Product::where('brand_id', $brand->id)->orderBy('id', 'DESC')->where('status', true)->paginate(12);
-    
-   if ($request->ajax()) {
-// dd($request);
-     $id = DB::table('languages')->where('sign', '=', $lang)->first();
-    if ($id) {
-      Session::put('language', $id->id);
-    } else {
-      $data = DB::table('languages')->where('is_default', '=', 1)->first();
-      Session::put('language', $data->id);
-    }
-    $data = [];
-    $cur = Session::get('currency');
-    if ($cur) {
-      $currency = Currency::find($cur);
-    } else {
-      $currency = Currency::where('is_default', 1)->first();
-    }
 
-    $brand = null;
-    $subcat = null;
-    $childcat = null;
-
-    if($request->min !='undefined' && $request->max !='undefined'){
-         $minprice = $request->min / $currency->value;
-    $maxprice = $request->max / $currency->value;
-    }else{
-         $minprice = 0;
-    $maxprice = 0;
-    }
-   
-    $sort = $request->sort;
-    $search = $request->search;
-    $slug = $request->slug;
-    
-    $brand = Brand::where('slug', $slug)->orwhere('slug_ar', $slug)->where('status', 1)->first();
-
-    
-    
-     $prods = Product::when($brand, function ($query, $brand) {
-      return $query->where('brand_id', $brand->id);
-    })
-      ->when($subcat, function ($query, $subcat) {
-        return $query->where('subcategory_id', $subcat->id);
-      })
-      ->when($childcat, function ($query, $childcat) {
-        return $query->where('childcategory_id', $childcat->id);
-      })
-      ->when($search !== "undefined", function ($query) use ($search) {
-        if(!empty($search)){
-        $slang = Session::get('language');
-        $lang  = DB::table('languages')->where('is_default', '=', 1)->first();
-        if (!$slang) {
-          if ($lang->id == 2) {
-            return $query->whereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
-          } else {
-            return $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
-          }
-        } else {
-          if ($slang == 2) {
-            return $query->whereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
-          } else {
-            return $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
-          }
-        }
-            
-        }
-      })
-      ->when($minprice, function ($query, $minprice) {
-
-        $query->whereHas('colors', function ($query) use ($minprice) {
-          $query->where('size_price', '>=', $minprice);
-        });
-      })
-      ->when($maxprice, function ($query, $maxprice) {
-
-        $query->whereHas('colors', function ($query) use ($maxprice) {
-          $query->where('size_price', '<=', $maxprice);
-        });
-      })
-      ->when($sort, function ($query, $sort) {
-        if ($sort == 'date_desc') {
-          return $query->orderBy('id', 'DESC');
-        } elseif ($sort == 'date_asc') {
-          return $query->orderBy('id', 'ASC');
-        } elseif ($sort == 'price_desc') {
-          return $query->orderBy('price', 'DESC');
-        } elseif ($sort == 'price_asc') {
-          return $query->orderBy('price', 'ASC');
-        }
-      })
-      ->when(empty($sort), function ($query, $sort) {
-        return $query->orderBy('id', 'DESC');
+    if ($request->ajax()) {
+      // dd($request);
+      $id = DB::table('languages')->where('sign', '=', $lang)->first();
+      if ($id) {
+        Session::put('language', $id->id);
+      } else {
+        $data = DB::table('languages')->where('is_default', '=', 1)->first();
+        Session::put('language', $data->id);
       }
-      );
-    
-    // -----------------------------------------------//
-    // $prods = $prods->where(function ($query) use ($brand, $subcat, $childcat, $request) {
-    //   $flag = 0;
-    //   if (!empty($cat)) {
-                   
+      $data = [];
+      $cur = Session::get('currency');
+      if ($cur) {
+        $currency = Currency::find($cur);
+      } else {
+        $currency = Currency::where('is_default', 1)->first();
+      }
 
-    //     foreach ($cat->attributes as $key => $attribute) {
-        
-    //       $inname = $attribute->input_name;
-    //       $chFilters = $request[$inname];
-    //       if (!empty($chFilters)) {
-    //         $flag = 1;
-    //         foreach ($chFilters as $key => $chFilter) {
-    //           if ($key == 0) {
-    //             $query->where('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
-    //           } else {
-    //             $query->orWhere('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
+      $brand = null;
+      $subcat = null;
+      $childcat = null;
 
-    //   if (!empty($subcat)) {
-    //     foreach ($subcat->attributes as $attribute) {
-    //       $inname = $attribute->input_name;
-    //       $chFilters = $request["$inname"];
-    //       if (!empty($chFilters)) {
-    //         $flag = 1;
-    //         foreach ($chFilters as $key => $chFilter) {
-    //           if ($key == 0 && $flag == 0) {
-    //             $query->where('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
-    //           } else {
-    //             $query->orWhere('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
+      if ($request->min != 'undefined' && $request->max != 'undefined') {
+        $minprice = $request->min / $currency->value;
+        $maxprice = $request->max / $currency->value;
+      } else {
+        $minprice = 0;
+        $maxprice = 0;
+      }
+
+      $sort = $request->sort;
+      $search = $request->search;
+      $slug = $request->slug;
+
+      $brand = Brand::where('slug', $slug)->orwhere('slug_ar', $slug)->where('status', 1)->first();
 
 
-    //   if (!empty($childcat)) {
-    //     foreach ($childcat->attributes as $attribute) {
-    //       $inname = $attribute->input_name;
-    //       $chFilters = $request["$inname"];
-    //       if (!empty($chFilters)) {
-    //         $flag = 1;
-    //         foreach ($chFilters as $key => $chFilter) {
-    //           if ($key == 0 && $flag == 0) {
-    //             $query->where('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
-    //           } else {
-    //             $query->orWhere('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
+
+      $prods = Product::when($brand, function ($query, $brand) {
+        return $query->where('brand_id', $brand->id);
+      })
+        ->when($subcat, function ($query, $subcat) {
+          return $query->where('subcategory_id', $subcat->id);
+        })
+        ->when($childcat, function ($query, $childcat) {
+          return $query->where('childcategory_id', $childcat->id);
+        })
+        ->when($search !== "undefined", function ($query) use ($search) {
+          if (!empty($search)) {
+            $slang = Session::get('language');
+            $lang  = DB::table('languages')->where('is_default', '=', 1)->first();
+            if (!$slang) {
+              if ($lang->id == 2) {
+                return $query->whereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
+              } else {
+                return $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
+              }
+            } else {
+              if ($slang == 2) {
+                return $query->whereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
+              } else {
+                return $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhereRaw('MATCH (name_ar) AGAINST (? IN BOOLEAN MODE)', array($search))->orWhere('name', 'like', '%' . $search . '%')->orWhere('name_ar', 'like', '%' . $search . '%');
+              }
+            }
+          }
+        })
+        ->when($minprice, function ($query, $minprice) {
+
+          $query->whereHas('colors', function ($query) use ($minprice) {
+            $query->where('size_price', '>=', $minprice);
+          });
+        })
+        ->when($maxprice, function ($query, $maxprice) {
+
+          $query->whereHas('colors', function ($query) use ($maxprice) {
+            $query->where('size_price', '<=', $maxprice);
+          });
+        })
+        ->when($sort, function ($query, $sort) {
+          if ($sort == 'date_desc') {
+            return $query->orderBy('id', 'DESC');
+          } elseif ($sort == 'date_asc') {
+            return $query->orderBy('id', 'ASC');
+          } elseif ($sort == 'price_desc') {
+            return $query->orderBy('price', 'DESC');
+          } elseif ($sort == 'price_asc') {
+            return $query->orderBy('price', 'ASC');
+          }
+        })
+        ->when(
+          empty($sort),
+          function ($query, $sort) {
+            return $query->orderBy('id', 'DESC');
+          }
+        );
+
+      // -----------------------------------------------//
+      // $prods = $prods->where(function ($query) use ($brand, $subcat, $childcat, $request) {
+      //   $flag = 0;
+      //   if (!empty($cat)) {
 
 
-    $products = $prods->where('status', true)->paginate(12);
-   
+      //     foreach ($cat->attributes as $key => $attribute) {
+
+      //       $inname = $attribute->input_name;
+      //       $chFilters = $request[$inname];
+      //       if (!empty($chFilters)) {
+      //         $flag = 1;
+      //         foreach ($chFilters as $key => $chFilter) {
+      //           if ($key == 0) {
+      //             $query->where('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
+      //           } else {
+      //             $query->orWhere('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+
+      //   if (!empty($subcat)) {
+      //     foreach ($subcat->attributes as $attribute) {
+      //       $inname = $attribute->input_name;
+      //       $chFilters = $request["$inname"];
+      //       if (!empty($chFilters)) {
+      //         $flag = 1;
+      //         foreach ($chFilters as $key => $chFilter) {
+      //           if ($key == 0 && $flag == 0) {
+      //             $query->where('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
+      //           } else {
+      //             $query->orWhere('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+
+
+      //   if (!empty($childcat)) {
+      //     foreach ($childcat->attributes as $attribute) {
+      //       $inname = $attribute->input_name;
+      //       $chFilters = $request["$inname"];
+      //       if (!empty($chFilters)) {
+      //         $flag = 1;
+      //         foreach ($chFilters as $key => $chFilter) {
+      //           if ($key == 0 && $flag == 0) {
+      //             $query->where('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
+      //           } else {
+      //             $query->orWhere('attributes', 'like', '%' . '"' . $chFilter . '"' . '%');
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // });
+
+
+      $products = $prods->where('status', true)->paginate(12);
+
       $data['ajax_check'] = 1;
 
-      return view('includes.product.brand-products', compact('products', 'brand','slug'));
+      return view('includes.product.brand-products', compact('products', 'brand', 'slug'));
     }
-    return view('front.single_brand', compact('products', 'brand','slug'));
+    return view('front.single_brand', compact('products', 'brand', 'slug'));
   }
 
 
@@ -996,18 +997,18 @@ class FrontendController extends Controller
     if ($request->ajax()) {
       return view('front.pagination.blog', compact('blogs'));
     }
-    
-    $tagz='';
+
+    $tagz = '';
     $name = Blog::pluck('tags')->toArray();
     foreach ($name as $nm) {
       $tagz .= $nm . ',';
     }
     $tags = array_unique(explode(',', $tagz));
-     $bcats = BlogCategory::all();
-     $archives = Blog::orderBy('created_at', 'desc')->get()->groupBy(function ($item) {
+    $bcats = BlogCategory::all();
+    $archives = Blog::orderBy('created_at', 'desc')->get()->groupBy(function ($item) {
       return $item->created_at->format('F Y');
     })->take(5)->toArray();
-    return view('front.blog', compact('blogs','archives','bcats', 'tags'));
+    return view('front.blog', compact('blogs', 'archives', 'bcats', 'tags'));
   }
 
 
@@ -1420,7 +1421,6 @@ class FrontendController extends Controller
   {
     $validator = Validator::make($request->all(), [
       'name' => ['required'],
-      'email' => ['required'],
       // 'birth_date' => ['required']
     ]);
 
@@ -1435,11 +1435,11 @@ class FrontendController extends Controller
       );
     }
 
-    $subs = Subscriber::where('email', '=', $request->email)->first();
+    $subs = Subscriber::where('name', '=', $request->name)->first();
     if (isset($subs)) {
       return response()->json([
         'status' => false,
-        'errors' => ['email' =>  [0 => 'This Email Has Already Been Taken.']]
+        'errors' => ['name' =>  [0 => 'This Name Has Already Been Taken.']]
       ]);
     }
     $subscribe = new Subscriber;
@@ -1881,13 +1881,11 @@ class FrontendController extends Controller
   } // end function 
 
 
- public function invoice($id)
-    {
+  public function invoice($id)
+  {
 
-        $order = Order::findOrFail($id);
-        $cart = unserialize(bzdecompress(utf8_decode($order->cart)));
-        return view('admin.order.invoice', compact('order', 'cart'));
-    }
-
-
+    $order = Order::findOrFail($id);
+    $cart = unserialize(bzdecompress(utf8_decode($order->cart)));
+    return view('admin.order.invoice', compact('order', 'cart'));
+  }
 }

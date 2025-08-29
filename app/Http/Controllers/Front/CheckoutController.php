@@ -287,7 +287,7 @@ class CheckoutController extends Controller
             } else {
                 $tax = 0;
             }
-            
+
             if (!Session::has('coupon_total')) {
                 $total = $total - $coupon;
                 $total = $total + 0;
@@ -370,7 +370,7 @@ class CheckoutController extends Controller
                 $tax = ($total / 100) * $gs->tax;
                 $total = $total + $tax;
             }
-            
+
             if (!Session::has('coupon_total')) {
                 $total = $total - $coupon;
                 $total = $total + 0;
@@ -504,7 +504,7 @@ class CheckoutController extends Controller
                 $tax = ($total / 100) * $gs->tax;
                 $total = $total + $tax;
             }
-            
+
             if (!Session::has('coupon_total')) {
                 $total = $total - $coupon;
                 $total = $total + 0;
@@ -604,7 +604,7 @@ class CheckoutController extends Controller
                 $tax = ($total / 100) * $gs->tax;
                 $total = $total + $tax;
             }
-            
+
             if (!Session::has('coupon_total')) {
                 $total = $total - $coupon;
                 $total = $total + 0;
@@ -723,19 +723,17 @@ class CheckoutController extends Controller
 
         if (Auth::check()) {
 
-            $validator = Validator::make($request->only(['personal_name', 'personal_email']), [
+            $validator = Validator::make($request->only(['personal_name']), [
 
                 // 'address'   => 'required',
                 'personal_name' => 'required|min:4',
-                'personal_email' => 'required|email',
 
             ]);
         } else {
-            $validator = Validator::make($request->only(['personal_name', 'personal_email']), [
+            $validator = Validator::make($request->only(['personal_name']), [
 
                 // 'address'   => 'required|min:5',
                 'personal_name' => 'required|min:4',
-                // 'personal_email' => 'required|email',
 
             ]);
         }
@@ -761,16 +759,16 @@ class CheckoutController extends Controller
             return redirect()->back()->with('unsuccess', "You must choose any payment getway");
         }
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -904,7 +902,7 @@ class CheckoutController extends Controller
 
                 return redirect()->back()->with('unsuccess', "Selected shipping slot is no longer available.");
             }
-        
+
             // Reserve the shipping slot
             $shippingDetails = $shippingService->reserveShippingSlot(
                 $request->shipping_schedule_id,
@@ -937,7 +935,7 @@ class CheckoutController extends Controller
         $order['method'] = $paymentGateway->title;
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -957,7 +955,7 @@ class CheckoutController extends Controller
         $order['customer_address'] = $request->address;
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -1232,8 +1230,8 @@ class CheckoutController extends Controller
         Session::forget('coupon_piece_size');
         Session::forget('coupon_pro');
 
-        //Sending Email To Buyer
-        if ($gs->is_smtp == 1) {
+        //Sending Email To Buyer - DISABLED (email removed)
+        /*if ($gs->is_smtp == 1) {
             if (!empty($request->personal_email)) {
                 $msg = "Hello " . $request->personal_name . "!<br> You have placed a new order.<br>Your order number is " . $order->order_number . ".Please wait for your delivery. <br>Thank you.";
                 $msgs = '<html><body>';
@@ -1242,7 +1240,7 @@ class CheckoutController extends Controller
                 $msgs .= "</table>";
                 $msgs .= "</body></html>";
                 $data = [
-                    'to' => $request->personal_email,
+
                     'subject' => "Your Order Placed!!",
                     'body' => $msgs,
                 ];
@@ -1250,21 +1248,20 @@ class CheckoutController extends Controller
                 $mailer = new GeniusMailer();
                 $mailer->sendCustomMailToUser($data, $order->id);
             } else {
-                $to = $request->personal_email;
+
                 $subject = "Your Order Placed!!";
                 $msg = "Hello " . $request->personal_name . "!\nYou have placed a new order.\nYour order number is " . $order->order_number . ".Please wait for your delivery. \nThank you.";
                 $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
                 mail($to, $subject, $msg, $headers);
             }
-        }
+        }*/
 
 
 
         //Sending Email To Admin
         //Sending Email To Admin
         if ($gs->is_smtp == 1) {
-            $msg = "مرحباً أيها المسؤول!<br> تم استلام طلب جديد في متجرك. <br> رقم الطلب هو " . $order->order_number . " <br> اسم العميل : " . $order->customer_name . "<br>البريد الإلكتروني للعميل : " .
-                $order->customer_email . "<br>رقم هاتف العميل : " . $order->customer_phone . "<br> يرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. <br> شكراً لك.";
+            $msg = "مرحباً أيها المسؤول!<br> تم استلام طلب جديد في متجرك. <br> رقم الطلب هو " . $order->order_number . " <br> اسم العميل : " . $order->customer_name . "<br>رقم هاتف العميل : " . $order->customer_phone . "<br> يرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. <br> شكراً لك.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             $data = [
                 'to' => $gs->email,
@@ -1277,8 +1274,7 @@ class CheckoutController extends Controller
         } else {
             $to = $gs->email;
             $subject = "تم استلام طلب جديد!!";
-            $msg = "مرحباً أيها المسؤول!\nتم استلام طلب جديد في متجرك.\nرقم الطلب هو " . $order->order_number . "\nاسم العميل : " . $order->customer_name . "\nالبريد الإلكتروني للعميل : " .
-                $order->customer_email . "\nرقم هاتف العميل : " . $order->customer_phone . "\nيرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. \nشكراً لك.";
+            $msg = "مرحباً أيها المسؤول!\nتم استلام طلب جديد في متجرك.\nرقم الطلب هو " . $order->order_number . "\nاسم العميل : " . $order->customer_name . "\nرقم هاتف العميل : " . $order->customer_phone . "\nيرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. \nشكراً لك.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             mail($to, $subject, $msg, $headers);
         }
@@ -1338,22 +1334,20 @@ class CheckoutController extends Controller
             }
             $productsList .= "\n";
         }
-            
-             $customerDetails = '';
+
+        $customerDetails = '';
         if ($order->dp == 0) {
             $customerDetails .= "Name: " . ($order->shipping_name ?: $order->customer_name) . "\n";
-            $customerDetails .= "Email: " . ($order->shipping_email ?: $order->customer_email) . "\n";
-           
-        } 
+        }
 
 
         // Prepare shipping details
         $shippingDetails = '';
         if ($order->shipping != "pickup" && $order->dp == 0) {
             // $shippingDetails .= "Name: " . ($order->shipping_name ?: $order->customer_name) . "\n";
-            // $shippingDetails .= "Email: " . ($order->shipping_email ?: $order->customer_email) . "\n";
+
             // $shippingDetails .= "Address: " . ($order->shipping_address ?: $order->customer_address) . "\n";
-            
+
             $shippingDetails .= "Phone Number: " . ($order->shipping_phone ?: $order->customer_phone) . "\n";
             $shippingDetails .= "City: " . ($order->shipping_city ?: $order->customer_city) . "\n";
             $shippingDetails .= "Area: " . $order->area . "\n";
@@ -1381,13 +1375,13 @@ class CheckoutController extends Controller
                 $trackingInfo = "Mylerz Barcode: " . $order->barcod;
             }
         }
-        
+
         $deliverySchedule = '';
         if ($order->scheduled_delivery_date && $order->scheduled_delivery_start_time && $order->scheduled_delivery_end_time) {
             $deliveryDate = date('d/m/Y', strtotime($order->scheduled_delivery_date));
             $startTime = date('h:i A', strtotime($order->scheduled_delivery_start_time));
             $endTime = date('h:i A', strtotime($order->scheduled_delivery_end_time));
-        
+
             $deliverySchedule = "{$deliveryDate} ({$startTime} - {$endTime})";
         }
 
@@ -1398,15 +1392,15 @@ class CheckoutController extends Controller
             '{ORDER_NUMBER}' => $order->order_number,
             '{ORDER_DATE}' => date('d/m/Y h:i A', strtotime($order->created_at)),
             '{DELIVERY_SCHEDULE}' => $deliverySchedule,
-            '{ORDER_TOTAL}' =>  round($order->pay_amount * $order->currency_value, 2) . $order->currency_sign ,
+            '{ORDER_TOTAL}' =>  round($order->pay_amount * $order->currency_value, 2) . $order->currency_sign,
             '{PAYMENT_METHOD}' => $order->method,
             '{ORDER_STATUS}' => ucwords($order->status),
             '{PRODUCTS_LIST}' => trim($productsList),
             '{SHIPPING_DETAILS}' => trim($shippingDetails),
-                  '{CUSTOMER_DETAILS}' => trim($customerDetails),
+            '{CUSTOMER_DETAILS}' => trim($customerDetails),
             '{TRACKING_INFO}' => $trackingInfo,
             '{CUSTOMER_NAME}' => $order->customer_name,
-            '{CUSTOMER_EMAIL}' => $order->customer_email,
+
             '{CUSTOMER_PHONE}' => $order->customer_phone,
             '{CURRENCY_SIGN}' => $order->currency_sign,
         ];
@@ -1457,19 +1451,19 @@ class CheckoutController extends Controller
 
         if (Auth::check()) {
 
-            $validator = Validator::make($request->only(['personal_name', 'personal_email']), [
+            $validator = Validator::make($request->only(['personal_name']), [
 
                 // 'address'   => 'required',
                 'personal_name' => 'required|min:4',
-                'personal_email' => 'required|email',
+
 
             ]);
         } else {
-            $validator = Validator::make($request->only(['personal_name', 'personal_email']), [
+            $validator = Validator::make($request->only(['personal_name']), [
 
                 // 'address'   => 'required|min:5',
                 'personal_name' => 'required|min:4',
-                'personal_email' => 'required|email',
+
 
             ]);
         }
@@ -1495,16 +1489,16 @@ class CheckoutController extends Controller
             return redirect()->back()->with('unsuccess', "You must choose any payment getway");
         }
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -1666,7 +1660,7 @@ class CheckoutController extends Controller
         $order['method'] = $request->method;
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -1686,7 +1680,7 @@ class CheckoutController extends Controller
         $order['customer_address'] = $request->address;
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -1961,8 +1955,8 @@ class CheckoutController extends Controller
         Session::forget('coupon_piece_size');
         Session::forget('coupon_pro');
 
-        //Sending Email To Buyer
-        if ($gs->is_smtp == 1) {
+        //Sending Email To Buyer - DISABLED (email removed)
+        /*if ($gs->is_smtp == 1) {
             if (!empty($request->personal_email)) {
                 $msg = "Hello " . $request->personal_name . "!<br> You have placed a new order.<br>Your order number is " . $order->order_number . ".Please wait for your delivery. <br>Thank you.";
                 $msgs = '<html><body>';
@@ -1971,7 +1965,7 @@ class CheckoutController extends Controller
                 $msgs .= "</table>";
                 $msgs .= "</body></html>";
                 $data = [
-                    'to' => $request->personal_email,
+
                     'subject' => "Your Order Placed!!",
                     'body' => $msgs,
                 ];
@@ -1979,21 +1973,20 @@ class CheckoutController extends Controller
                 $mailer = new GeniusMailer();
                 $mailer->sendCustomMailToUser($data, $order->id);
             } else {
-                $to = $request->personal_email;
+
                 $subject = "Your Order Placed!!";
                 $msg = "Hello " . $request->personal_name . "!\nYou have placed a new order.\nYour order number is " . $order->order_number . ".Please wait for your delivery. \nThank you.";
                 $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
                 mail($to, $subject, $msg, $headers);
             }
-        }
+        }*/
 
 
 
         //Sending Email To Admin
         //Sending Email To Admin
         if ($gs->is_smtp == 1) {
-            $msg = "مرحباً أيها المسؤول!<br> تم استلام طلب جديد في متجرك. <br> رقم الطلب هو " . $order->order_number . " <br> اسم العميل : " . $order->customer_name . "<br>البريد الإلكتروني للعميل : " .
-                $order->customer_email . "<br>رقم هاتف العميل : " . $order->customer_phone . "<br> يرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. <br> شكراً لك.";
+            $msg = "مرحباً أيها المسؤول!<br> تم استلام طلب جديد في متجرك. <br> رقم الطلب هو " . $order->order_number . " <br> اسم العميل : " . $order->customer_name . "<br>رقم هاتف العميل : " . $order->customer_phone . "<br> يرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. <br> شكراً لك.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             $data = [
                 'to' => $gs->email,
@@ -2006,8 +1999,7 @@ class CheckoutController extends Controller
         } else {
             $to = $gs->email;
             $subject = "تم استلام طلب جديد!!";
-            $msg = "مرحباً أيها المسؤول!\nتم استلام طلب جديد في متجرك.\nرقم الطلب هو " . $order->order_number . "\nاسم العميل : " . $order->customer_name . "\nالبريد الإلكتروني للعميل : " .
-                $order->customer_email . "\nرقم هاتف العميل : " . $order->customer_phone . "\nيرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. \nشكراً لك.";
+            $msg = "مرحباً أيها المسؤول!\nتم استلام طلب جديد في متجرك.\nرقم الطلب هو " . $order->order_number . "\nاسم العميل : " . $order->customer_name . "\nرقم هاتف العميل : " . $order->customer_phone . "\nيرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. \nشكراً لك.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             mail($to, $subject, $msg, $headers);
         }
@@ -2024,16 +2016,16 @@ class CheckoutController extends Controller
     public function bankTransfer(Request $request)
     {
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -2148,7 +2140,7 @@ class CheckoutController extends Controller
 
             'address'   => 'required|min:5',
             'personal_name' => 'required|min:4',
-            'personal_email' => 'required|email',
+
 
         ]);
 
@@ -2172,7 +2164,7 @@ class CheckoutController extends Controller
         $order['method'] = $request->method;
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -2205,7 +2197,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //     $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -2418,7 +2410,7 @@ class CheckoutController extends Controller
             $mailer = new GeniusMailer();
             $mailer->sendAutoOrderMail($data, $order->id);
         } else {
-            $to = $request->personal_email;
+
             $subject = "Your Order Placed!!";
             $msg = "Hello " . $request->personal_name . "!\nYou have placed a new order.\nYour order number is " . $order->order_number . ".Please wait for your delivery. \nThank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
@@ -2438,7 +2430,7 @@ class CheckoutController extends Controller
             $to = $gs->email;
             $subject = "New Order Recieved!!";
             $msg = "Hello Admin!\nYour store has recieved a new order.\nOrder Number is " . $order->order_number . "\nCompany Name : " . $order->company_name . "\nCustomer name : " . $order->customer_name . "\nCustomer Email : " .
-                $order->customer_email . "\nCustomer phone : " . $order->customer_phone . "\nPlease login to your panel to check. \nThank you.";
+                "\nCustomer phone : " . $order->customer_phone . "\nPlease login to your panel to check. \nThank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             mail($to, $subject, $msg, $headers);
         }
@@ -2451,16 +2443,16 @@ class CheckoutController extends Controller
     public function accepts(Request $request)
     {
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -2588,7 +2580,7 @@ class CheckoutController extends Controller
 
             'address'   => 'required|min:5',
             'personal_name' => 'required|min:4',
-            'personal_email' => 'required|email',
+
 
         ]);
 
@@ -2611,7 +2603,7 @@ class CheckoutController extends Controller
         $order['method'] = "Accept";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -2629,7 +2621,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //    $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -2918,7 +2910,7 @@ class CheckoutController extends Controller
         $bostaa['shipping_data'] = array(
 
             "apartment" => "803",
-            "email" => $order->customer_email,
+            "phone" => $order->customer_phone,
             "floor" => "42",
             "first_name" => $order->customer_name,
             "street" => $order->customer_address,
@@ -2969,7 +2961,7 @@ class CheckoutController extends Controller
         $payy_keys['billing_data'] = array(
 
             "apartment" => "803",
-            "email" => $order->customer_email,
+            "phone" => $order->customer_phone,
             "floor" => "42",
             "first_name" => $order->customer_name,
             "street" => $order->customer_address,
@@ -3013,16 +3005,16 @@ class CheckoutController extends Controller
 
 
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -3159,7 +3151,7 @@ class CheckoutController extends Controller
         $order['method'] = "Thawani";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -3178,7 +3170,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //    $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -3454,7 +3446,7 @@ class CheckoutController extends Controller
             "order_id" => $order->id,
             'name' => $order->customer_name,
             'mobile' => $order->customer_phone,
-            'email' => $order->customer_email
+
 
 
         );
@@ -3489,16 +3481,16 @@ class CheckoutController extends Controller
     {
 
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -3634,7 +3626,7 @@ class CheckoutController extends Controller
         $order['method'] = "Thawani";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -3653,7 +3645,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //    $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -3910,7 +3902,7 @@ class CheckoutController extends Controller
             "currencyCode" => "QAR",
             "orderId" => $order->id,
             "amount" => round($order->pay_amount * $order->currency_value, 2),
-            "customerEmail" => $order->customer_email,
+
             "customerName" => $order->customer_name,
             "customerPhone" => $order->customer_phone,
             "CustomerCountry" => $order->customer_country,
@@ -3956,19 +3948,19 @@ class CheckoutController extends Controller
 
         if (Auth::check()) {
 
-            $validator = Validator::make($request->only(['address', 'personal_name', 'personal_email']), [
+            $validator = Validator::make($request->only(['address', 'personal_name']), [
 
                 'address'   => 'required',
                 'personal_name' => 'required|min:4',
-                'personal_email' => 'required|email',
+
 
             ]);
         } else {
-            $validator = Validator::make($request->only(['address', 'personal_name', 'personal_email']), [
+            $validator = Validator::make($request->only(['address', 'personal_name']), [
 
                 'address'   => 'required|min:5',
                 'personal_name' => 'required|min:4',
-                'personal_email' => 'required|email',
+
 
             ]);
         }
@@ -3980,16 +3972,16 @@ class CheckoutController extends Controller
                 ->withInput();
         }
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -4126,7 +4118,7 @@ class CheckoutController extends Controller
         $order['payment_status'] = "processing";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -4146,7 +4138,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city']    = $request->city;
         //    $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -4403,7 +4395,7 @@ class CheckoutController extends Controller
     "metadata": {"udf1": "Metadata 1"},
     "reference": {"transaction": "txn_' . $order->order_number . '", "order": "ord_' . $order->order_number . '"},
     "receipt": {"email": true},
-    "customer": {"first_name": "' . $request->personal_name . '", "email": "' . $request->personal_email . '", "phone": {"country_code": ' . $country->phonecode . ', "number": "' . $request->phone . '"}},
+    "customer": {"first_name": "' . $request->personal_name . '", "phone": {"country_code": ' . $country->phonecode . ', "number": "' . $request->phone . '"}},
     "source": {"id": "src_all"},
     "redirect": {"url": "' . route('tap.notify') . '"}
   }',
@@ -4485,8 +4477,8 @@ class CheckoutController extends Controller
         $order->payment_status = 'Processing';
         $order->update();
 
-        //Sending Email To Buyer
-        if ($gs->is_smtp == 1) {
+        //Sending Email To Buyer - DISABLED (email removed)
+        /*if ($gs->is_smtp == 1) {
             if (!empty($request->personal_email)) {
                 $msg = "مرحبًا " . $order->customer_name . "!<br> لقد قمت بطلب طلب جديد.<br> رقم طلبك هو " . $order->order_number . ". يرجى الانتظار لتسليم طلبك.<br> شكرا لك.";
                 $msgs = '<html><body>';
@@ -4495,7 +4487,7 @@ class CheckoutController extends Controller
                 $msgs .= "</table>";
                 $msgs .= "</body></html>";
                 $data = [
-                    'to' => $request->customer_email,
+        
                     'subject' => "تم تقديم طلبك!",
                     'body' => $msgs,
                 ];
@@ -4503,20 +4495,19 @@ class CheckoutController extends Controller
                 $mailer = new GeniusMailer();
                 $mailer->sendCustomMailToUser($data, $order->id);
             } else {
-                $to = $request->personal_email;
+
                 $subject = "تم تقديم طلبك!";
                 $msg = "مرحبًا " . $request->personal_name . "! \n لقد قمت بطلب طلب جديد.\n رقم طلبك هو " . $order->order_number . ". يرجى الانتظار لتسليم طلبك.\n شكرا لك.";
                 $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
                 mail($to, $subject, $msg, $headers);
             }
-        }
+        }*/
 
 
 
         //Sending Email To Admin
         if ($gs->is_smtp == 1) {
-            $msg = "مرحباً أيها المسؤول!<br> تم استلام طلب جديد في متجرك. <br> رقم الطلب هو " . $order->order_number . " <br> اسم العميل : " . $order->customer_name . "<br>البريد الإلكتروني للعميل : " .
-                $order->customer_email . "<br>رقم هاتف العميل : " . $order->customer_phone . "<br> يرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. <br> شكراً لك.";
+            $msg = "مرحباً أيها المسؤول!<br> تم استلام طلب جديد في متجرك. <br> رقم الطلب هو " . $order->order_number . " <br> اسم العميل : " . $order->customer_name . "<br>رقم هاتف العميل : " . $order->customer_phone . "<br> يرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. <br> شكراً لك.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             $data = [
                 'to' => $gs->email,
@@ -4530,8 +4521,7 @@ class CheckoutController extends Controller
         } else {
             $to = $gs->email;
             $subject = "تم استلام طلب جديد!!";
-            $msg = "مرحباً أيها المسؤول!\nتم استلام طلب جديد في متجرك.\nرقم الطلب هو " . $order->order_number . "\nاسم العميل : " . $order->customer_name . "\nالبريد الإلكتروني للعميل : " .
-                $order->customer_email . "\nرقم هاتف العميل : " . $order->customer_phone . "\nيرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. \nشكراً لك.";
+            $msg = "مرحباً أيها المسؤول!\nتم استلام طلب جديد في متجرك.\nرقم الطلب هو " . $order->order_number . "\nاسم العميل : " . $order->customer_name . "\nرقم هاتف العميل : " . $order->customer_phone . "\nيرجى تسجيل الدخول إلى لوحة التحكم الخاصة بك للتحقق. \nشكراً لك.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
             mail($to, $subject, $msg, $headers);
         }
@@ -4706,16 +4696,16 @@ class CheckoutController extends Controller
     public function  gateway(Request $request)
     {
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -4844,7 +4834,7 @@ class CheckoutController extends Controller
 
             'address'   => 'required|min:5',
             'personal_name' => 'required|min:4',
-            'personal_email' => 'required|email',
+
 
         ]);
 
@@ -4866,7 +4856,7 @@ class CheckoutController extends Controller
         $order['method'] = "Bank Misr";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -4887,7 +4877,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //   $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -5143,16 +5133,16 @@ class CheckoutController extends Controller
     public function  Nbe(Request $request)
     {
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -5282,7 +5272,7 @@ class CheckoutController extends Controller
             'address'   => 'required|min:5',
 
             'personal_name' => 'required|min:4',
-            'personal_email' => 'required|email',
+
         ]);
 
 
@@ -5304,7 +5294,7 @@ class CheckoutController extends Controller
         $order['method'] = "Natioinal Bank of Egypt";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -5325,7 +5315,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //  $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -5582,16 +5572,16 @@ class CheckoutController extends Controller
     {
         $input = $request->all();
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -5641,7 +5631,7 @@ class CheckoutController extends Controller
             'address'   => 'required|min:5',
 
             'personal_name' => 'required|min:4',
-            'personal_email' => 'required|email',
+
         ]);
 
 
@@ -5664,7 +5654,7 @@ class CheckoutController extends Controller
         $order['method'] = "Fawry";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -5692,7 +5682,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //  $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -5877,7 +5867,7 @@ class CheckoutController extends Controller
             $mailer = new GeniusMailer();
             $mailer->sendAutoOrderMail($data, $order->id);
         } else {
-            $to = $request->personal_email;
+
             $subject = "Your Order Placed!!";
             $msg = "Hello " . $request->personal_name . "!\nYou have placed a new order.\nYour order number is " . $order->order_number . ".Please wait for your delivery. \nThank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
@@ -5911,16 +5901,16 @@ class CheckoutController extends Controller
     {
         $input = $request->all();
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -5969,7 +5959,7 @@ class CheckoutController extends Controller
 
             'address'   => 'required|min:5',
             'personal_name' => 'required|min:4',
-            'personal_email' => 'required|email',
+
 
         ]);
 
@@ -5993,7 +5983,7 @@ class CheckoutController extends Controller
         $order['method'] = "Paypal";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -6021,7 +6011,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //  $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -6206,7 +6196,7 @@ class CheckoutController extends Controller
             $mailer = new GeniusMailer();
             $mailer->sendAutoOrderMail($data, $order->id);
         } else {
-            $to = $request->personal_email;
+
             $subject = "Your Order Placed!!";
             $msg = "Hello " . $request->personal_name . "!\nYou have placed a new order.\nYour order number is " . $order->order_number . ".Please wait for your delivery. \nThank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
@@ -6236,16 +6226,16 @@ class CheckoutController extends Controller
     {
         $input = $request->all();
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->personal_name . $request->personal_email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->email_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -6294,7 +6284,7 @@ class CheckoutController extends Controller
 
             'address'   => 'required|min:5',
             'personal_name' => 'required|min:4',
-            'personal_email' => 'required|email',
+
 
         ]);
 
@@ -6318,7 +6308,7 @@ class CheckoutController extends Controller
         $order['method'] = "vapulus";
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->personal_email;
+
         $order['customer_name'] = $request->personal_name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -6343,7 +6333,7 @@ class CheckoutController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         //  $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;
@@ -6528,7 +6518,7 @@ class CheckoutController extends Controller
             $mailer = new GeniusMailer();
             $mailer->sendAutoOrderMail($data, $order->id);
         } else {
-            $to = $request->personal_email;
+
             $subject = "Your Order Placed!!";
             $msg = "Hello " . $request->personal_name . "!\nYou have placed a new order.\nYour order number is " . $order->order_number . ".Please wait for your delivery. \nThank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";
@@ -6708,7 +6698,7 @@ class CheckoutController extends Controller
             $msgs .= "</table>";
             $msgs .= "</body></html>";
             $data = [
-                'to' => $order->customer_email,
+
                 'subject' => "Your Order Placed!!",
                 'body' => $msgs,
             ];
@@ -6716,7 +6706,7 @@ class CheckoutController extends Controller
             $mailer = new GeniusMailer();
             $mailer->sendCustomMail($data);
         } else {
-            $to = $order->customer_email;
+
             $subject = "Your Order Placed!!";
             $msg = "Hello " . $order->customer_name . "!\nYou have placed a new order.\nYour order number is " . $order->order_number . ".Please wait for your delivery. \nThank you.";
             $headers = "From: " . $gs->from_name . "<" . $gs->from_email . ">";

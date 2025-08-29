@@ -47,16 +47,16 @@ class PaymentController extends Controller
 
 
         if ($request->pass_check) {
-            $users = User::where('email', '=', $request->personal_email)->get();
+            $users = User::where('name', '=', $request->personal_name)->get();
             if (count($users) == 0) {
                 if ($request->personal_pass == $request->personal_confirm) {
                     $user = new User;
                     $user->name = $request->personal_name;
-                    $user->email = $request->personal_email;
+
                     $user->password = bcrypt($request->personal_pass);
-                    $token = md5(time() . $request->personal_name . $request->personal_email);
+                    $token = md5(time() . $request->personal_name);
                     $user->verification_link = $token;
-                    $user->affilate_code = md5($request->name . $request->email);
+                    $user->affilate_code = md5($request->personal_name);
                     $user->emai_verified = 'Yes';
                     $user->save();
                     Auth::guard('web')->login($user);
@@ -177,7 +177,7 @@ class PaymentController extends Controller
         $order['method'] = $request->method;
         $order['shipping'] = $request->shipping;
         $order['pickup_location'] = $request->pickup_location;
-        $order['customer_email'] = $request->email;
+
         $order['customer_name'] = $request->name;
         $order['shipping_cost'] = $request->shipping_cost;
         $order['packing_cost'] = $request->packing_cost;
@@ -192,7 +192,7 @@ class PaymentController extends Controller
         $order['customer_country'] = $request->customer_country;
         $order['customer_city'] = $request->city;
         $order['customer_zip'] = $request->zip;
-        $order['shipping_email'] = $request->shipping_email;
+
         $order['shipping_name'] = $request->shipping_name;
         $order['shipping_phone'] = $request->shipping_phone;
         $order['shipping_address'] = $request->shipping_address;

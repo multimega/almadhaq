@@ -189,7 +189,7 @@
                                         </div>
                                     </div>
                                     <div class="col-lg-12 text-center mt-2">
-                                        <a class="btn sendEmail send" href="javascript:;" class="send" data-email="{{ $order->customer_email }}" data-toggle="modal" data-target="#vendorform">
+                                        <a class="btn sendEmail send" href="javascript:;" class="send" data-phone="{{ $order->customer_phone }}" data-toggle="modal" data-target="#vendorform">
                                                 <i class="fa fa-send"></i> {{ __('Send Email') }}
                                         </a>
                                     </div>

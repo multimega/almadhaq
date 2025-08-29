@@ -14,21 +14,21 @@ use Illuminate\Validation\Rule;
 use Laravel\Passport\Client;
 use Validator;
 use Socialite;
-use Google_Client; 
+use Google_Client;
 
 
 
 class SocialAuthController extends Controller
 {
-    
-    
- private function token($token)
+
+
+    private function token($token)
     {
         return 'Bearer ' . $token;
     }
-    
-    
-    
+
+
+
     public function googleRedirectToProvider()
     {
         return Socialite::driver('google')->scopes(['profile', 'email'])->redirect();
@@ -54,16 +54,16 @@ class SocialAuthController extends Controller
     private function registerSociaUser($socialObject)
     {
         $google_user = $socialObject;
-        $user = User::firstOrNew(['email' => $google_user->email]);
+        $user = User::firstOrNew(['name' => $google_user->name]);
         if (!$user->id) {
             $user->name = $google_user->name;
             $user->email = $google_user->email;
             $user->password = bcrypt(str_random(8));
             $user->save();
-           
-            $provider = new SocialProvider ;
+
+            $provider = new SocialProvider;
             $provider->provider_id = $google_user->provider_id;
-          
+
             $provider->save();
         }
         $success['token'] = $this->token($user->CreateAcessToken());
@@ -71,38 +71,35 @@ class SocialAuthController extends Controller
         return response()->json([
             'success' => $success
         ], 200);
-
     }
 
     private function loginSocialUser(Request $request)
     {
         $google_user = $request;
-        $user = User::firstOrNew(['email' => $google_user->email]);
+        $user = User::firstOrNew(['name' => $google_user->name]);
         if (!$user->id) {
             $user->name = $google_user->name;
             $user->email = $google_user->email;
-           
+
             $user->password = bcrypt(str_random(8));
             $user->save();
-            
-            $provider = new SocialProvider ;
+
+            $provider = new SocialProvider;
             $provider->provider_id = $google_user->provider_id;
-            
+
             $provider->save();
-           
         }
         $success['token'] = $this->token($user->CreateAcessToken());
         $success['name'] = $user->name;
         return response()->json([
             'success' => $success
         ], 200);
-
     }
 
-  public function facebookToken()
+    public function facebookToken()
     {
-        $social=  Socialsetting::find(1);
-    $client_id = $social->fclient_id;
+        $social =  Socialsetting::find(1);
+        $client_id = $social->fclient_id;
         $client_secret =  $social->fclient_secret;
         $link = "https://graph.facebook.com/oauth/access_token?client_id=" . $client_id . "&client_secret=" . $client_secret . "&grant_type=client_credentials";
         $curl = curl_init($link);
@@ -193,7 +190,7 @@ class SocialAuthController extends Controller
         ], 201);
 
     */
-               
+
         $validator = Validator::make($request->all(), [
             'input_token' => 'required|string',
             'provider_id' => 'required|string',
@@ -204,77 +201,65 @@ class SocialAuthController extends Controller
             ], 201);
         }
         $contents = [];
-    
-       $link = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=". $request->input_token ;
-            try {
-                $contents = (array)json_decode(file_get_contents($link), true);
-            } catch (\Exception $e) {
-            }
-                  $data = $contents;
-                    if (isset($data['email'])) {
-                        $user = User::where('email', $data['email'])->first();
-                        if (!$user) {
-                            $user = User::create([
-                                'name' => $data['email'],
-                                'email' => $data['email'],
-                               
-                                  'email_verified' => 'Yes',
-                                     'is_provider' => 1,
-           
-           
-                                'affilate_code' => md5($data['email']),
-           
-                                'password' => bcrypt($data['email']),
-                            ]);
-                              $provider = SocialProvider::create([
-                    
+
+        $link = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" . $request->input_token;
+        try {
+            $contents = (array)json_decode(file_get_contents($link), true);
+        } catch (\Exception $e) {
+        }
+        $data = $contents;
+        if (isset($data['email'])) {
+            $user = User::where('email', $data['email'])->first();
+            if (!$user) {
+                $user = User::create([
+                    'name' => $data['email'],
+                    'email' => $data['email'],
+
+                    'email_verified' => 'Yes',
+                    'is_provider' => 1,
+
+
+                    'affilate_code' => md5($data['email']),
+
+                    'password' => bcrypt($data['email']),
+                ]);
+                $provider = SocialProvider::create([
+
                     'user_id' => $user->id,
                     'provider_id' => $request->provider_id,
                     'provider' => 'google',
-               
-                ]);
-        
-	
-            			$refelar = new Referral;
-            			$refelar->user_id = $user->id;
-            			$refelar->rand = rand(123, 999999) ;
-            			$refelar->code = str_random(6).rand(123456, 999999);
-            			$refelar->save();
-            			
-            			
-    
-                        }
-                        $res['token'] = $this->token($user->CreateAcessToken());
-                        $res['id'] = $user->id;
-                        $res['name'] = $user->name;
-                        $res['email'] = $user->email;
-                        return response($res, 200);
-                    }else{
-                        
-                          return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
-                    }
-            if (isset($contents['data'])) {
-                if ($contents['data']['is_valid']) {
-         
-                } else {
-                    return response([
-                        "success"=>true,
-                        'error' =>$contents
-                    ], 401);
-                }
-            } else {
-                return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
-            }
-        
-        return response($contents, 500);
 
-    
-        
-        
-         
-        
-        
-        
+                ]);
+
+
+                $refelar = new Referral;
+                $refelar->user_id = $user->id;
+                $refelar->rand = rand(123, 999999);
+                $refelar->code = str_random(6) . rand(123456, 999999);
+                $refelar->save();
+            }
+            $res['token'] = $this->token($user->CreateAcessToken());
+            $res['id'] = $user->id;
+            $res['name'] = $user->name;
+            $res['email'] = $user->email;
+            return response($res, 200);
+        } else {
+
+            return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
+        }
+        if (isset($contents['data'])) {
+            if ($contents['data']['is_valid']) {
+            } else {
+                return response([
+                    "success" => true,
+                    'error' => $contents
+                ], 401);
+            }
+        } else {
+            return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
+        }
+
+        return response($contents, 500);
     }
 
     public function AuthenticateFacebook(Request $request)
@@ -298,52 +283,50 @@ class SocialAuthController extends Controller
                 $contents = (array)json_decode(file_get_contents($link), true);
             } catch (\Exception $e) {
             }
-                  $data = $this->facebookGetUser($request->input_token);
-                    if (isset($data['email'])) {
-                        $user = User::where('email', $data['email'])->first();
-                        if (!$user) {
-                            $user = User::create([
-                                'name' => $data['name'],
-                                'email' => $data['email'],
-                                 'email_verified' => 'Yes',
-                                 'is_provider' => 1,
-           
-           
-                                'affilate_code' => md5($data['name'].$data['email']),
-                                'password' => bcrypt($data['email'] . $data['name']),
-                            ]);
-                              $provider = SocialProvider::create([
-                    
-                    'user_id' => $user->id,
-                    'provider_id' => $request->provider_id,
-                    'provider' => 'facebook',
-               
-                ]);
+            $data = $this->facebookGetUser($request->input_token);
+            if (isset($data['email'])) {
+                $user = User::where('email', $data['email'])->first();
+                if (!$user) {
+                    $user = User::create([
+                        'name' => $data['name'],
+                        'email' => $data['email'],
+                        'email_verified' => 'Yes',
+                        'is_provider' => 1,
 
-	
-            			$refelar = new Referral;
-            			$refelar->user_id = $user->id;
-            			$refelar->rand = rand(123, 999999) ;
-            			$refelar->code = str_random(6).rand(123456, 999999);
-            			$refelar->save();
-    
-                        }
-                        $res['token'] = $this->token($user->CreateAcessToken());
-                        $res['id'] = $user->id;
-                        $res['name'] = $user->name;
-                        $res['email'] = $user->email;
-                        return response($res, 200);
-                    }else{
-                        
-                          return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
-                    }
+
+                        'affilate_code' => md5($data['name'] . $data['email']),
+                        'password' => bcrypt($data['email'] . $data['name']),
+                    ]);
+                    $provider = SocialProvider::create([
+
+                        'user_id' => $user->id,
+                        'provider_id' => $request->provider_id,
+                        'provider' => 'facebook',
+
+                    ]);
+
+
+                    $refelar = new Referral;
+                    $refelar->user_id = $user->id;
+                    $refelar->rand = rand(123, 999999);
+                    $refelar->code = str_random(6) . rand(123456, 999999);
+                    $refelar->save();
+                }
+                $res['token'] = $this->token($user->CreateAcessToken());
+                $res['id'] = $user->id;
+                $res['name'] = $user->name;
+                $res['email'] = $user->email;
+                return response($res, 200);
+            } else {
+
+                return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
+            }
             if (isset($contents['data'])) {
                 if ($contents['data']['is_valid']) {
-         
                 } else {
                     return response([
-                        "success"=>true,
-                        'error' =>$contents
+                        "success" => true,
+                        'error' => $contents
                     ], 401);
                 }
             } else {
@@ -351,83 +334,67 @@ class SocialAuthController extends Controller
             }
         }
         return response($contents, 500);
-
     }
-public function appleAuthenticate(Request $request)
+    public function appleAuthenticate(Request $request)
     {
-        
-        
+
+
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string',
-           
+            'name' => 'required|string',
+
         ]);
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->errors()
             ], 201);
         }
-      
-    $contents = [];
-      
-               
-                    if (isset($request->email)) {
-                        $user = User::where('email', $request->email)->first();
-                        if (!$user) {
-                            $user = User::create([
-                                'name' => $request->email,
-                                'email' => $request->email,
-                                'contact_id' => rand(),
-                                  'email_verified' => 'Yes',
-                                     'is_provider' => 0,
-           
-           
-                                'affilate_code' => md5($request->email),
-           
-                                'password' => bcrypt($request->email),
-                            ]);
-                        
-        
-	
-            			$refelar = new Referral;
-            			$refelar->user_id = $user->id;
-            			$refelar->rand = rand(123, 999999) ;
-            			$refelar->code = str_random(6).rand(123456, 999999);
-            			$refelar->save();
-            			
-            			
-    
-                        }
-                        $res['token'] = $this->token($user->CreateAcessToken());
-                        $res['id'] = $user->id;
-                        $res['name'] = $user->name;
-                        $res['email'] = $user->email;
-                        return response($res, 200);
-                    }else{
-                        
-                          return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
-                    }
-            if (isset($contents['data'])) {
-                if ($contents['data']['is_valid']) {
-         
-                } else {
-                    return response([
-                        "success"=>true,
-                        'error' =>$contents
-                    ], 401);
-                }
-            } else {
-                return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
-            }
-        
-        return response($contents, 500);
 
-    
-        
-        
-        
-        
-        
-        
-        
+        $contents = [];
+
+
+        if (isset($request->name)) {
+            $user = User::where('name', $request->name)->first();
+            if (!$user) {
+                $user = User::create([
+                    'name' => $request->name,
+                    'contact_id' => rand(),
+                    'email_verified' => 'Yes',
+                    'is_provider' => 0,
+
+
+                    'affilate_code' => md5($request->name),
+
+                    'password' => bcrypt($request->name),
+                ]);
+
+
+
+                $refelar = new Referral;
+                $refelar->user_id = $user->id;
+                $refelar->rand = rand(123, 999999);
+                $refelar->code = str_random(6) . rand(123456, 999999);
+                $refelar->save();
+            }
+            $res['token'] = $this->token($user->CreateAcessToken());
+            $res['id'] = $user->id;
+            $res['name'] = $user->name;
+            return response($res, 200);
+        } else {
+
+            return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
+        }
+        if (isset($contents['data'])) {
+            if ($contents['data']['is_valid']) {
+            } else {
+                return response([
+                    "success" => true,
+                    'error' => $contents
+                ], 401);
+            }
+        } else {
+            return isset($contents['error']) ? response($contents['error'], 401) : response($contents, 401);
+        }
+
+        return response($contents, 500);
     }
 }

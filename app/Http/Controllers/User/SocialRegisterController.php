@@ -19,17 +19,17 @@ class SocialRegisterController extends Controller
 
     public function __construct()
     {
-    
-      $link = Socialsetting::findOrFail(1);
-    //   dd($link);
-      Config::set('services.google.client_id', $link->gclient_id);
-      Config::set('services.google.client_secret', $link->gclient_secret);
-      Config::set('services.google.redirect', url('/auth/google/callback'));
-      Config::set('services.facebook.client_id', $link->fclient_id);
-      Config::set('services.facebook.client_secret', $link->fclient_secret);
-      $url = url('/auth/facebook/callback');
-      $url = preg_replace("/^http:/i", "https:", $url);
-      Config::set('services.facebook.redirect', $url);
+
+        $link = Socialsetting::findOrFail(1);
+        //   dd($link);
+        Config::set('services.google.client_id', $link->gclient_id);
+        Config::set('services.google.client_secret', $link->gclient_secret);
+        Config::set('services.google.redirect', url('/auth/google/callback'));
+        Config::set('services.facebook.client_id', $link->fclient_id);
+        Config::set('services.facebook.client_secret', $link->fclient_secret);
+        $url = url('/auth/facebook/callback');
+        $url = preg_replace("/^http:/i", "https:", $url);
+        Config::set('services.facebook.redirect', $url);
     }
 
     public function redirectToProvider($provider)
@@ -39,56 +39,45 @@ class SocialRegisterController extends Controller
 
     public function handleProviderCallback($provider)
     {
-        try
-        {
+        try {
             $socialUser = Socialite::driver($provider)->user();
-        }
-        catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect('/');
         }
         //check if we have logged provider
-        $socialProvider = SocialProvider::where('provider_id',$socialUser->getId())->first();
-        if(!$socialProvider)
-        {
-        $user = User::where('email',$socialUser->email)->whereNotNull('email')->first();
-            if(!$user){
-            //create a new user and provider
-            $user = new User;
-            $user->email = $socialUser->email;
-            $user->name = $socialUser->name;
-            $user->photo = $socialUser->avatar_original;
-            $user->email_verified = 'Yes';
-            $user->is_provider = 1;
-            $user->affilate_code = $socialUser->name.$socialUser->email;
-            $user->affilate_code = md5($user->affilate_code);
-            $user->save();
+        $socialProvider = SocialProvider::where('provider_id', $socialUser->getId())->first();
+        if (!$socialProvider) {
+            $user = User::where('name', $socialUser->name)->whereNotNull('name')->first();
+            if (!$user) {
+                //create a new user and provider
+                $user = new User;
+                $user->name = $socialUser->name;
+                $user->photo = $socialUser->avatar_original;
+                $user->is_provider = 1;
+                $user->affilate_code = $socialUser->name;
+                $user->affilate_code = md5($user->affilate_code);
+                $user->save();
 
-            $user->socialProviders()->create(
-                ['provider_id' => $socialUser->getId(), 'provider' => $provider]
-            );
-            $notification = new Notification;
-            $notification->user_id = $user->id;
-            $notification->save();
+                $user->socialProviders()->create(
+                    ['provider_id' => $socialUser->getId(), 'provider' => $provider]
+                );
+                $notification = new Notification;
+                $notification->user_id = $user->id;
+                $notification->save();
 
-	                $refelar = new Referral;
-            			$refelar->user_id = $user->id;
-            			$refelar->rand = rand(123, 999999) ;
-            			$refelar->code = str_random(6).rand(123456, 999999);
-            			$refelar->save();
-            			
-}
-        }
-        else
-        {
+                $refelar = new Referral;
+                $refelar->user_id = $user->id;
+                $refelar->rand = rand(123, 999999);
+                $refelar->code = str_random(6) . rand(123456, 999999);
+                $refelar->save();
+            }
+        } else {
 
             $user_id = $socialProvider->user_id;
             $user = User::find($user_id);
-
         }
 
-        Auth::guard('web')->login($user); 
+        Auth::guard('web')->login($user);
         return redirect()->route('user-dashboard');
-
     }
 }
