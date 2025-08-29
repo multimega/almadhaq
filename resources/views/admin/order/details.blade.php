@@ -762,12 +762,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-12 text-center mt-2">
+                {{-- <div class="col-lg-12 text-center mt-2">
                     <a class="btn sendEmail send" href="javascript:;" class="send"
                         data-name="{{ $order->customer_name }}" data-toggle="modal" data-target="#vendorform">
                         <i class="fa fa-send"></i> {{ __('Send Email') }}
                     </a>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
