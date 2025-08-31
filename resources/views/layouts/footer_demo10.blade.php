@@ -76,6 +76,7 @@
         .floating-social-icons {
             right: 15px;
             gap: 10px;
+            top: 81%;
         }
 
         .floating-icon {
