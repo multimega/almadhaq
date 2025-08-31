@@ -536,6 +536,81 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
         }
         
     }
+    
+    /* Floating Social Icons Styles */
+    .floating-social-icons {
+        position: fixed;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .floating-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .floating-icon:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    
+    .snapchat-icon {
+        background: linear-gradient(45deg, #FFFC00, #FFE600);
+        color: #000;
+    }
+    
+    .instagram-icon {
+        background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+        color: #fff;
+    }
+    
+    .whatsapp-icon {
+        background: #25D366;
+        color: #fff;
+    }
+    
+    .floating-icon i {
+        font-size: 20px;
+    }
+    
+    .floating-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .floating-social-icons {
+            right: 15px;
+            gap: 10px;
+        }
+        
+        .floating-icon {
+            width: 45px;
+            height: 45px;
+        }
+        
+        .floating-icon i,
+        .floating-icon svg {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+    }
 </style>
 	@yield('styles')
 	
@@ -562,9 +637,9 @@ snaptr('track', 'PAGE_VIEW');
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <body class="sss">
 
-@if($gs->is_loader == 1)
+{{-- @if($gs->is_loader == 1)
 	<div class="preloader" id="preloader" style="background: url({{asset('assets/images/'.$gs->loader)}}) no-repeat scroll center center #FFF;"></div>
-@endif
+@endif --}}
 
 @if($gs->is_popup== 1)
     
@@ -2840,6 +2915,28 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
   }
   
 </script>
+
+    <!-- Floating Social Icons -->
+    <div class="floating-social-icons">
+        @if(App\Models\Socialsetting::find(1)->d_status == 1)
+        <a href="{{ App\Models\Socialsetting::find(1)->dribble }}" class="floating-icon snapchat-icon" target="_blank" title="Snapchat">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="20" height="20">
+                <path fill="#000" d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/>
+            </svg>
+        </a>
+        @endif
+        
+        @if(App\Models\Socialsetting::find(1)->i_status == 1)
+        <a href="{{ App\Models\Socialsetting::find(1)->instagram }}" class="floating-icon instagram-icon" target="_blank" title="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+        @endif
+        
+        <a href="https://wa.me/{{$main->phone }}" class="floating-icon whatsapp-icon" target="_blank" title="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+    <!-- End Floating Social Icons -->
 
 </body>
 
