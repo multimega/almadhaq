@@ -541,7 +541,7 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
     .floating-social-icons {
         position: fixed;
         right: 20px;
-        top: 50%;
+        top: 85%;
         transform: translateY(-50%);
         z-index: 1000;
         display: flex;
@@ -566,6 +566,8 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
     .floating-icon:hover {
         transform: scale(1.1);
         box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        color: #fff;
+        text-decoration: none;
     }
     
     .snapchat-icon {
