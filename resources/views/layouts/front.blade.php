@@ -540,8 +540,8 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
     /* Floating Social Icons Styles */
     .floating-social-icons {
         position: fixed;
-        right: 20px;
-        top: 85%;
+        right: 15px;
+        top: 83%;
         transform: translateY(-50%);
         z-index: 1000;
         display: flex;
@@ -2110,7 +2110,7 @@ $ch= App\Models\Service::orderby('id','desc')->get()->take(4);
 --}}
 	<!-- Back to Top Start -->
 	<div class="bottomtotop">
-		<i class="fas fa-chevron-right" style="margin-bottom: 44px;"></i>
+		<i class="fas fa-chevron-right" style="margin-bottom: -40px;"></i>
 	</div>
 	<!-- Back to Top End -->
 
