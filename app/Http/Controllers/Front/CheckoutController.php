@@ -1291,20 +1291,26 @@ class CheckoutController extends Controller
     {
         $order = Order::findOrFail($id);
         $cart = unserialize(bzdecompress(utf8_decode($order->cart)));
-        $settings = Generalsetting::first();
+        // Use findOrFail(1) to ensure we get the latest data, not cached
+        $settings = Generalsetting::findOrFail(1);
 
-        // Get phone number - prioritize customer_phone, fallback to shipping_phone
+        // Get phone number from settings
         $phone = $settings->whatsapp_number;
 
         if (!$phone) {
             return response()->json(['error' => 'No phone number found for this order'], 400);
         }
 
-        // Clean phone number (remove spaces, dashes, etc.)
-        $phone = preg_replace('/[^\d+]/', '', $phone);
+        // Clean phone number (remove spaces, dashes, etc.) - keep only digits and +
+        $phone = preg_replace('/[^\d+]/', '', trim($phone));
 
         // Get country code from settings (default to +20 for Egypt)
-        $countryCode = $settings->whatsapp_country_code ?: '+20';
+        $countryCode = trim($settings->whatsapp_country_code ?: '+20');
+
+        // Ensure country code starts with +
+        if (!str_starts_with($countryCode, '+')) {
+            $countryCode = '+' . ltrim($countryCode, '+');
+        }
 
         // Add country code if not present
         if (!str_starts_with($phone, '+')) {
@@ -1315,6 +1321,14 @@ class CheckoutController extends Controller
             } else {
                 $phone = $countryCode . $phone;
             }
+        }
+
+        // Final cleanup: ensure phone contains only + followed by digits
+        // Remove any non-digit characters except the leading +
+        if (str_starts_with($phone, '+')) {
+            $phone = '+' . preg_replace('/[^\d]/', '', substr($phone, 1));
+        } else {
+            $phone = '+' . preg_replace('/[^\d]/', '', $phone);
         }
 
         // Get custom message template or use default

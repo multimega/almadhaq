@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Models\Generalsetting;
 use Artisan;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class GeneralSettingController extends Controller
     }
 
 
-    private function setEnv($key, $value,$prev)
+    private function setEnv($key, $value, $prev)
     {
         file_put_contents(app()->environmentFilePath(), str_replace(
             $key . '=' . $prev,
@@ -44,7 +45,7 @@ class GeneralSettingController extends Controller
         ));
     }
 
-  // Genereal Settings All post requests will be done in this method
+    // Genereal Settings All post requests will be done in this method
     public function generalupdate(Request $request)
     {
         //--- Validation Section
@@ -208,61 +209,58 @@ class GeneralSettingController extends Controller
             //--- Redirect Section Ends
         }
     }
-    
-    
+
+
     public function photoupdate(Request $request)
     {
         //--- Validation Section
         $validator = Validator::make($request->all(), $this->rules);
 
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
         }
         //--- Validation Section Ends
 
         //--- Logic Section
         else {
-        $input = $request->all();
-        $data = Generalsetting::findOrFail(1);
-         if ($file = $request->file('wallet_photo'))
-            {
-                $name = time().$file->getClientOriginalName();
-                $data->upload($name,$file,$data->wallet_photo);
+            $input = $request->all();
+            $data = Generalsetting::findOrFail(1);
+            if ($file = $request->file('wallet_photo')) {
+                $name = time() . $file->getClientOriginalName();
+                $data->upload($name, $file, $data->wallet_photo);
                 $input['wallet_photo'] = $name;
             }
-            if ($file = $request->file('loyalty_photo'))
-            {
-                $name = time().$file->getClientOriginalName();
-                $data->upload($name,$file,$data->loyalty_photo);
+            if ($file = $request->file('loyalty_photo')) {
+                $name = time() . $file->getClientOriginalName();
+                $data->upload($name, $file, $data->loyalty_photo);
                 $input['loyalty_photo'] = $name;
             }
-            if ($file = $request->file('brandphoto'))
-            {
-                $name = time().$file->getClientOriginalName();
-                $data->upload($name,$file,$data->brandphoto);
+            if ($file = $request->file('brandphoto')) {
+                $name = time() . $file->getClientOriginalName();
+                $data->upload($name, $file, $data->brandphoto);
                 $input['brandphoto'] = $name;
             }
 
-        $data->update($input);
-        //--- Logic Section Ends
+            $data->update($input);
+            //--- Logic Section Ends
 
-/*
+            /*
         Artisan::call('cache:clear');
         Artisan::call('config:clear');
         Artisan::call('route:clear');
         Artisan::call('view:clear');
 */
-        //--- Redirect Section
-         $msg = trans('Update Success');
-        
-        
-        return response()->json([
-            
-            'status'  => true,
-            'msg'   =>   $msg
-            
-        ],200);
-        //--- Redirect Section Ends
+            //--- Redirect Section
+            $msg = trans('Update Success');
+
+
+            return response()->json([
+
+                'status'  => true,
+                'msg'   =>   $msg
+
+            ], 200);
+            //--- Redirect Section Ends
         }
     }
 
@@ -272,56 +270,54 @@ class GeneralSettingController extends Controller
         $validator = Validator::make($request->all(), $this->rules);
 
         if ($validator->fails()) {
-          return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
+            return response()->json(array('errors' => $validator->getMessageBag()->toArray()));
         }
         //--- Validation Section Ends
 
         //--- Logic Section
         else {
-        $input = $request->all();
-        $data = Generalsetting::findOrFail(1);
-        $prev = $data->molly_key;  
-        
-        if ($request->vendor_ship_info == ""){
-            $input['vendor_ship_info'] = 0;
-        }
+            $input = $request->all();
+            $data = Generalsetting::findOrFail(1);
+            $prev = $data->molly_key;
 
-        if ($request->instamojo_sandbox == ""){
-            $input['instamojo_sandbox'] = 0;
-        }
+            if ($request->vendor_ship_info == "") {
+                $input['vendor_ship_info'] = 0;
+            }
 
-        if ($request->paypal_mode == ""){
-            $input['paypal_mode'] = 'live';
-        }
-        else {
-            $input['paypal_mode'] = 'sandbox';
-        }
+            if ($request->instamojo_sandbox == "") {
+                $input['instamojo_sandbox'] = 0;
+            }
 
-        if ($request->paytm_mode == ""){
-            $input['paytm_mode'] = 'live';
-        }
-        else {
-            $input['paytm_mode'] = 'sandbox';
-        }
-        $data->update($input);
+            if ($request->paypal_mode == "") {
+                $input['paypal_mode'] = 'live';
+            } else {
+                $input['paypal_mode'] = 'sandbox';
+            }
+
+            if ($request->paytm_mode == "") {
+                $input['paytm_mode'] = 'live';
+            } else {
+                $input['paytm_mode'] = 'sandbox';
+            }
+            $data->update($input);
 
 
-        $this->setEnv('MOLLIE_KEY',$data->molly_key,$prev);
-        // Set Molly ENV
+            $this->setEnv('MOLLIE_KEY', $data->molly_key, $prev);
+            // Set Molly ENV
 
-        //--- Logic Section Ends
+            //--- Logic Section Ends
 
-        //--- Redirect Section
-         $msg = trans('Update Success');
-        
-        
-        return response()->json([
-            
-            'status'  => true,
-            'msg'   =>   $msg
-            
-        ],200);
-        //--- Redirect Section Ends
+            //--- Redirect Section
+            $msg = trans('Update Success');
+
+
+            return response()->json([
+
+                'status'  => true,
+                'msg'   =>   $msg
+
+            ], 200);
+            //--- Redirect Section Ends
         }
     }
 
@@ -339,131 +335,126 @@ class GeneralSettingController extends Controller
     {
         return view('admin.generalsetting.favicon');
     }
-      public function  bosta()
-    
-    
+    public function  bosta()
+
+
     {
         return view('admin.generalsetting.bosta_settings');
-
     }
-     public function load()
+    public function load()
     {
         return view('admin.generalsetting.loader');
     }
-    
-     public function load2()
+
+    public function load2()
     {
         return view('admin.generalsetting.loader2');
     }
-  
-  
+
+
     public function  nbe()
     {
         return view('admin.generalsetting.nbe_settings');
     }
- 
+
     public function  fedex()
-     
+
     {
         return view('admin.generalsetting.fedex_settings');
     }
- 
- 
+
+
     public function  fastlo()
-     
+
     {
         return view('admin.generalsetting.fastlo_settings');
     }
-    
-   public function  aramex()
-     
+
+    public function  aramex()
+
     {
         return view('admin.generalsetting.aramex_settings');
     }
 
-     public function   thwani()
-     {
-       
+    public function   thwani()
+    {
+
         return view('admin.generalsetting.thawany_settings');
-     }
-    
-       public function   fatora()
-        {
-       
-        
-          return view('admin.generalsetting.fatora_setting');
-        
-         }
-     
-        public function  abs()
-        {
-       
-        
-          return view('admin.generalsetting.abs_settings');
-        
-         }
-         
-        public function  mylerz()
-        {
-       
-          return view('admin.generalsetting.mylerz_settings');
-        
-         }
-       
-        public function vapulus()
-        {
-        
-          return view('admin.generalsetting.vapulus_settings');
-          
-        }
-   
-       
-        public function tabby()
-        {
-    
-            return view('admin.generalsetting.tabby-settings');
-        }
-    
-         public function telr()
-        {
-    
-            return view('admin.generalsetting.telr-settings');
-        }
-    
-      public function paypalpaymentt()
-      {
-          return view('admin.generalsetting.paypal_setting');
-      }
-   
-     public function contents()
-     {
+    }
+
+    public function   fatora()
+    {
+
+
+        return view('admin.generalsetting.fatora_setting');
+    }
+
+    public function  abs()
+    {
+
+
+        return view('admin.generalsetting.abs_settings');
+    }
+
+    public function  mylerz()
+    {
+
+        return view('admin.generalsetting.mylerz_settings');
+    }
+
+    public function vapulus()
+    {
+
+        return view('admin.generalsetting.vapulus_settings');
+    }
+
+
+    public function tabby()
+    {
+
+        return view('admin.generalsetting.tabby-settings');
+    }
+
+    public function telr()
+    {
+
+        return view('admin.generalsetting.telr-settings');
+    }
+
+    public function paypalpaymentt()
+    {
+        return view('admin.generalsetting.paypal_setting');
+    }
+
+    public function contents()
+    {
         return view('admin.generalsetting.websitecontent');
-     }
-      public function  accept()
-      {
+    }
+    public function  accept()
+    {
         return view('admin.generalsetting.accept_settings');
-      }
-       public function   fawry()
+    }
+    public function   fawry()
 
     {
         return view('admin.generalsetting.fawry_settings');
     }
-      
-      
-     public function  bank()
+
+
+    public function  bank()
     {
         return view('admin.generalsetting.bankmisry');
     }
-     public function  tap()
+    public function  tap()
     {
         return view('admin.generalsetting.tap');
     }
-     public function header()
+    public function header()
     {
         return view('admin.generalsetting.header');
     }
 
-     public function footer()
+    public function footer()
     {
         return view('admin.generalsetting.footer');
     }
@@ -487,10 +478,10 @@ class GeneralSettingController extends Controller
     {
         return view('admin.generalsetting.popup');
     }
-    
-    
-            
-        public function whatsapp()
+
+
+
+    public function whatsapp()
     {
 
         $settings = Generalsetting::first();
@@ -498,21 +489,21 @@ class GeneralSettingController extends Controller
         $messageTemplate = $settings->whatsapp_message_template ?: Generalsetting::getDefaultMessageTemplate();
         $whatsappCountryCode = $settings->whatsapp_country_code;
         $whatsappNumber = $settings->whatsapp_number;
-        
+
         return view('admin.generalsetting.whatsapp', compact('messageTemplate', 'whatsappCountryCode', 'whatsappNumber'));
     }
-    
+
     public function templateselect()
     {
         return view('admin.generalsetting.templates');
     }
-    
- 
+
+
     public function maintain()
     {
         return view('admin.generalsetting.maintain');
     }
-    
+
     public function ispopup($status)
     {
 
@@ -529,7 +520,7 @@ class GeneralSettingController extends Controller
         $data->multiple_shipping = $status;
         $data->update();
     }
-  public function shipment($status)
+    public function shipment($status)
     {
 
         $data = Generalsetting::findOrFail(1);
@@ -661,7 +652,7 @@ class GeneralSettingController extends Controller
         $data = Generalsetting::findOrFail(1);
         $data->is_drift = $status;
         $data->update();
-    } 
+    }
     public function messenger($status)
     {
         $data = Generalsetting::findOrFail(1);
@@ -695,7 +686,7 @@ class GeneralSettingController extends Controller
         $data = Generalsetting::findOrFail(1);
         $data->is_home = $status;
         $data->update();
-    } 
+    }
     public function isshop($status)
     {
         $data = Generalsetting::findOrFail(1);
@@ -716,7 +707,7 @@ class GeneralSettingController extends Controller
         $data->is_disqus = $status;
         $data->update();
     }
- public function is_erp($status)
+    public function is_erp($status)
     {
         $data = Generalsetting::findOrFail(1);
         $data->is_erp = $status;
@@ -746,7 +737,7 @@ class GeneralSettingController extends Controller
         $data = Generalsetting::findOrFail(1);
         $data->is_currency = $status;
         $data->update();
-    } 
+    }
     public function brands($status)
     {
         $data = Generalsetting::findOrFail(1);
@@ -787,40 +778,40 @@ class GeneralSettingController extends Controller
         $data->is_maintain = $status;
         $data->update();
     }
-    
-    
-      public function allowZip($status)
+
+
+    public function allowZip($status)
     {
         $data = Generalsetting::findOrFail(1);
         $data->allow_zip = $status;
         $data->update();
     }
-    
-     public function allowShipTo($status)
+
+    public function allowShipTo($status)
     {
         $data = Generalsetting::findOrFail(1);
         $data->allow_shipto = $status;
         $data->update();
     }
-    
-     public function allowPickup($status)
+
+    public function allowPickup($status)
     {
         $data = Generalsetting::findOrFail(1);
         $data->allow_pickup = $status;
         $data->update();
     }
-    
-     public function blockIcon()
+
+    public function blockIcon()
     {
         return view('admin.generalsetting.block');
-    } 
-    
+    }
+
     public function erp_integration()
     {
         return view('admin.generalsetting.erp_integration');
-    } 
-    
-       /**
+    }
+
+    /**
      * Store WhatsApp settings
      */
     public function whatsapp_settings_store(Request $request)
@@ -841,26 +832,25 @@ class GeneralSettingController extends Controller
         }
 
         try {
-            // Get or create the general settings record
-            $settings = Generalsetting::first();
-            
-            if (!$settings) {
-                $settings = new Generalsetting();
-            }
+            // Get or create the general settings record (use findOrFail for consistency)
+            $settings = Generalsetting::findOrFail(1);
 
             // Update WhatsApp settings
             $settings->whatsapp_message_template = $request->whatsapp_message_template;
-            $settings->whatsapp_country_code = $request->whatsapp_country_code;
-            $settings->whatsapp_number = $request->whatsapp_number;
-                        
+            $settings->whatsapp_country_code = trim($request->whatsapp_country_code);
+            $settings->whatsapp_number = trim($request->whatsapp_number);
+
             // Save the settings
             $settings->save();
+
+            // Clear cache to ensure new values are used immediately
+            Artisan::call('cache:clear');
+            Artisan::call('config:clear');
 
             return response()->json([
                 'success' => true,
                 'message' => 'WhatsApp settings saved successfully!'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -868,7 +858,4 @@ class GeneralSettingController extends Controller
             ], 500);
         }
     }
-
-
-
 }
