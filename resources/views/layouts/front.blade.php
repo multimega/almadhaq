@@ -617,22 +617,7 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
 </style>
 	@yield('styles')
 	
-	
-<!-- Snap Pixel Code -->
-<script type='text/javascript'>
-(function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
-{a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
-a.queue=[];var s='script';r=t.createElement(s);r.async=!0;
-r.src=n;var u=t.getElementsByTagName(s)[0];
-u.parentNode.insertBefore(r,u);})(window,document,
-'https://sc-static.net/scevent.min.js');
 
-snaptr('init', '69b9f581-4e2d-4f35-8239-e1eaa687531d', {});
-
-snaptr('track', 'PAGE_VIEW');
-
-</script>
-<!-- End Snap Pixel Code -->
 
 <!-- Snap Pixel Code -->
 <script type='text/javascript'>
