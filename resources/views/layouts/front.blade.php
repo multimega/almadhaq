@@ -6,7 +6,14 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-KJG2XH2S');</script>
+  <!-- End Google Tag Manager -->
 	@php 
 
 $slang = Session::get('language');
@@ -619,29 +626,16 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
 	
 
 
-<!-- Snap Pixel Code -->
-<script type='text/javascript'>
-  (function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
-  {a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
-  a.queue=[];var s='script';r=t.createElement(s);r.async=!0;
-  r.src=n;var u=t.getElementsByTagName(s)[0];
-  u.parentNode.insertBefore(r,u);})(window,document,
-  'https://sc-static.net/scevent.min.js');
-  
-  snaptr('init', 'c30daa5a-58f5-4298-bb4a-9ac5dda5b379', {
-  'user_email': '_INSERT_USER_EMAIL_'
-  });
-  
-  snaptr('track', 'PAGE_VIEW');
-  
-  </script>
-  <!-- End Snap Pixel Code -->
 </head>
 <script src="{{asset('assets/front/js/jquery.js')}}"></script>
 <script src="{{asset('assets/front/js/lightbox.min.js')}}"></script>
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <body class="sss">
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KJG2XH2S"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
 
 {{-- @if($gs->is_loader == 1)
 	<div class="preloader" id="preloader" style="background: url({{asset('assets/images/'.$gs->loader)}}) no-repeat scroll center center #FFF;"></div>

@@ -5,6 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KJG2XH2S');</script>
+    <!-- End Google Tag Manager -->
+
     
     @php 
  
@@ -211,170 +219,13 @@ $chunk= App\Models\Service::get()->take(3);
     <!-- Main CSS File -->
  
 
-<script>
-  // Add to Cart Event
-  function snapAddToCart({
-    price,
-    currency,
-    item_ids,
-    item_category,
-    number_items,
-    uuid_c1,
-    user_email,
-    user_phone_number,
-    user_hashed_email,
-    user_hashed_phone_number,
-    firstname,
-    lastname,
-    geo_city,
-    geo_region
-  }) {
-    snaptr('track', 'ADD_CART', {
-      price,
-      currency,
-      item_ids,
-      item_category,
-      number_items,
-      uuid_c1,
-      user_email,
-      user_phone_number,
-      user_hashed_email,
-      user_hashed_phone_number,
-      firstname,
-      lastname,
-      geo_city,
-      geo_region
-    });
-  }
 
-  // Add to Wishlist Event
-  function snapAddToWishlist({
-    item_ids,
-    item_category,
-    number_items,
-    uuid_c1,
-    user_email,
-    user_phone_number,
-    user_hashed_email,
-    user_hashed_phone_number
-  }) {
-    snaptr('track', 'ADD_TO_WISHLIST', {
-      item_ids,
-      item_category,
-      number_items,
-      uuid_c1,
-      user_email,
-      user_phone_number,
-      user_hashed_email,
-      user_hashed_phone_number
-    });
-  }
-
-  // Purchase Event
-  function snapPurchase({
-    price,
-    currency,
-    transaction_id,
-    item_ids,
-    item_category,
-    number_items,
-    uuid_c1,
-    user_email,
-    user_phone_number,
-    user_hashed_email,
-    user_hashed_phone_number
-  }) {
-    snaptr('track', 'PURCHASE', {
-      price,
-      currency,
-      transaction_id,
-      item_ids,
-      item_category,
-      number_items,
-      uuid_c1,
-      user_email,
-      user_phone_number,
-      user_hashed_email,
-      user_hashed_phone_number
-    });
-  }
-
-  // Sign Up Event
-  function snapSignUp({
-    sign_up_method,
-    uuid_c1,
-    user_email,
-    user_phone_number,
-    user_hashed_email,
-    user_hashed_phone_number
-  }) {
-    snaptr('track', 'SIGN_UP', {
-      sign_up_method,
-      uuid_c1,
-      user_email,
-      user_phone_number,
-      user_hashed_email,
-      user_hashed_phone_number
-    });
-  }
-
-  // Achievement Unlocked Event (Snap Pixel)
-  function snapAchievementUnlocked(params) {
-    var opts = {};
-    if (params.level != null) opts.level = params.level;
-    if (params.uuid_c1 != null) opts.uuid_c1 = params.uuid_c1;
-    if (params.price != null) opts.price = params.price;
-    if (params.currency != null) opts.currency = params.currency;
-    if (params.transaction_id != null) opts.transaction_id = params.transaction_id;
-    if (params.item_ids != null) opts.item_ids = params.item_ids;
-    if (params.item_category != null) opts.item_category = params.item_category;
-    if (params.att_status != null) opts.att_status = params.att_status;
-    if (params.brands != null) opts.brands = params.brands;
-    if (params.client_deduplication_id != null) opts.client_deduplication_id = params.client_deduplication_id;
-    if (params.customer_status != null) opts.customer_status = params.customer_status;
-    if (params.data_use != null) opts.data_use = params.data_use;
-    if (params.delivery_method != null) opts.delivery_method = params.delivery_method;
-    if (params.event_tag != null) opts.event_tag = params.event_tag;
-    if (params.number_items != null) opts.number_items = params.number_items;
-    if (params.description != null) opts.description = params.description;
-    if (params.search_string != null) opts.search_string = params.search_string;
-    if (params.payment_info_available != null) opts.payment_info_available = params.payment_info_available;
-    if (params.sign_up_method != null) opts.sign_up_method = params.sign_up_method;
-    if (params.success != null) opts.success = params.success;
-    if (params.user_email != null) opts.user_email = params.user_email;
-    if (params.user_phone_number != null) opts.user_phone_number = params.user_phone_number;
-    if (params.user_hashed_email != null) opts.user_hashed_email = params.user_hashed_email;
-    if (params.user_hashed_phone_number != null) opts.user_hashed_phone_number = params.user_hashed_phone_number;
-    if (params.firstname != null) opts.firstname = params.firstname;
-    if (params.lastname != null) opts.lastname = params.lastname;
-    if (params.age != null) opts.age = params.age;
-    if (params.geo_city != null) opts.geo_city = params.geo_city;
-    if (params.geo_country != null) opts.geo_country = params.geo_country;
-    if (params.geo_postal_code != null) opts.geo_postal_code = params.geo_postal_code;
-    if (params.geo_region != null) opts.geo_region = params.geo_region;
-    snaptr('track', 'ACHIEVEMENT_UNLOCKED', opts);
-  }
-</script>
-
-<!-- Snap Pixel Code -->
-<script type='text/javascript'>
-    (function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
-    {a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
-    a.queue=[];var s='script';r=t.createElement(s);r.async=!0;
-    r.src=n;var u=t.getElementsByTagName(s)[0];
-    u.parentNode.insertBefore(r,u);})(window,document,
-    'https://sc-static.net/scevent.min.js');
-    
-    snaptr('init', 'c30daa5a-58f5-4298-bb4a-9ac5dda5b379', {
-    'user_email': '_INSERT_USER_EMAIL_'
-    });
-    
-    snaptr('track', 'PAGE_VIEW');
-    
-    </script>
-    <!-- End Snap Pixel Code -->
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KJG2XH2S"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div class="page-wrapper">
         
         <!--<div class="top-notice text-white bg-dark">
