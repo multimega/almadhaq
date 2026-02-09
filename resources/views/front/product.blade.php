@@ -1856,4 +1856,34 @@
             });
         </script>
 
+        <!-- GTM Data Layer - View Item -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
+            dataLayer.push({
+                event: "view_item",
+                ecommerce: {
+                    currency: "{{ $curr->name }}",
+                    value: {{ $productt->price * $curr->value }},
+                    items: [{
+                        item_id: "{{ $productt->sku ?? $productt->id }}",
+                        item_name: "@if(!$slang)@if($lang->id == 2){{ $productt->name_ar }}@else{{ $productt->name }}@endif @else @if($slang == 2){{ $productt->name_ar }}@else{{ $productt->name }}@endif @endif",
+                        affiliation: "{{ $gs->title }}",
+                        @if(!empty($productt->category))
+                        item_category: "@if(!$slang)@if($lang->id == 2){{ $productt->category->name_ar }}@else{{ $productt->category->name }}@endif @else @if($slang == 2){{ $productt->category->name_ar }}@else{{ $productt->category->name }}@endif @endif",
+                        @endif
+                        @if(!empty($productt->subcategory))
+                        item_category2: "@if(!$slang)@if($lang->id == 2){{ $productt->subcategory->name_ar }}@else{{ $productt->subcategory->name }}@endif @else @if($slang == 2){{ $productt->subcategory->name_ar }}@else{{ $productt->subcategory->name }}@endif @endif",
+                        @endif
+                        @if(!empty($productt->brand))
+                        item_brand: "{{ $productt->brand->name }}",
+                        @endif
+                        price: {{ $productt->price * $curr->value }},
+                        quantity: 1
+                    }]
+                }
+            });
+        </script>
+        <!-- End GTM Data Layer - View Item -->
+
 @endsection)

@@ -261,6 +261,47 @@ $lang = DB::table('languages')->where('is_default', '=', 1)->first();
 @endsection
 
 @section('scripts')
+
+<!-- GTM Data Layer - Purchase Event -->
+<script>
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
+    dataLayer.push({
+        event: "purchase",
+        ecommerce: {
+            transaction_id: "{{ $order->order_number }}",
+            value: {{ $order->pay_amount }},
+            tax: {{ $order->tax ?? 0 }},
+            shipping: {{ $order->shipping_cost ?? 0 }},
+            currency: "{{ $order->currency_sign ?? 'USD' }}",
+            @if(!empty($order->coupon_code))
+            coupon: "{{ $order->coupon_code }}",
+            @endif
+            items: [
+                @php $purchaseIndex = 0; @endphp
+                @if($order->cart)
+                    @php $cart = json_decode($order->cart, true); @endphp
+                    @if(isset($cart['items']))
+                        @foreach($cart['items'] as $item)
+                            @if($purchaseIndex > 0),@endif
+                            {
+                                item_id: "{{ $item['item']['sku'] ?? $item['item']['id'] }}",
+                                item_name: "@if(!$slang)@if($lang->id == 2){{ $item['item']['name_ar'] ?? $item['item']['name'] }}@else{{ $item['item']['name'] }}@endif @else @if($slang == 2){{ $item['item']['name_ar'] ?? $item['item']['name'] }}@else{{ $item['item']['name'] }}@endif @endif",
+                                affiliation: "{{ $gs->title ?? 'Store' }}",
+                                price: {{ $item['price'] }},
+                                quantity: {{ $item['qty'] }}
+                            }
+                            @php $purchaseIndex++; @endphp
+                        @endforeach
+                    @endif
+                @endif
+            ]
+        }
+    });
+    console.log('GTM purchase event fired for order: {{ $order->order_number }}');
+</script>
+<!-- End GTM Data Layer - Purchase Event -->
+
 <script>
    $(document).ready(function() {
     var orderId = $('#order_id').val();

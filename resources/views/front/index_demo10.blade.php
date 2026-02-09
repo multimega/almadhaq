@@ -1416,6 +1416,44 @@ $chunkss= App\Models\Service::orderby('id','desc')->get()->take(3);
             </div><!-- End .container -->
         </main><!-- End .main -->
         
+        <!-- GTM Data Layer - View Item List (Homepage) -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
+            dataLayer.push({
+                event: "view_item_list",
+                ecommerce: {
+                    item_list_id: "homepage_products",
+                    item_list_name: "Homepage Products",
+                    items: [
+                        @php $itemIndex = 0; @endphp
+                        @if($ps->featured == 1)
+                            @foreach($feature_products as $prod)
+                                @if($itemIndex > 0),@endif
+                                {
+                                    item_id: "{{ $prod->sku ?? $prod->id }}",
+                                    item_name: "@if(!$slang)@if($lang->id == 2){{ $prod->name_ar }}@else{{ $prod->name }}@endif @else @if($slang == 2){{ $prod->name_ar }}@else{{ $prod->name }}@endif @endif",
+                                    affiliation: "{{ $main->title ?? 'Store' }}",
+                                    @if(!empty($prod->category))
+                                    item_category: "@if(!$slang)@if($lang->id == 2){{ $prod->category->name_ar }}@else{{ $prod->category->name }}@endif @else @if($slang == 2){{ $prod->category->name_ar }}@else{{ $prod->category->name }}@endif @endif",
+                                    @endif
+                                    @if(!empty($prod->brand))
+                                    item_brand: "{{ $prod->brand->name }}",
+                                    @endif
+                                    item_list_id: "homepage_products",
+                                    item_list_name: "Homepage Products",
+                                    price: {{ $prod->price * $curr->value }},
+                                    index: {{ $itemIndex }},
+                                    quantity: 1
+                                }
+                                @php $itemIndex++; @endphp
+                            @endforeach
+                        @endif
+                    ]
+                }
+            });
+        </script>
+        <!-- End GTM Data Layer - View Item List -->
         
         
         

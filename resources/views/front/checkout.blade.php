@@ -62,6 +62,36 @@
     </div>
     <!-- Breadcrumb Area End -->
 
+    <!-- GTM Data Layer - Begin Checkout -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
+        dataLayer.push({
+            event: "begin_checkout",
+            ecommerce: {
+                currency: "{{ $curr->name ?? 'USD' }}",
+                value: {{ Session::has('cart') ? Session::get('cart')->totalPrice * $curr->value : 0 }},
+                items: [
+                    @if(Session::has('cart'))
+                        @php $cartIndex = 0; @endphp
+                        @foreach(Session::get('cart')->items as $product)
+                            @if($cartIndex > 0),@endif
+                            {
+                                item_id: "{{ $product['item']['sku'] ?? $product['item']['id'] }}",
+                                item_name: "@if(!$slang)@if($lang->id == 2){{ $product['item']['name_ar'] }}@else{{ $product['item']['name'] }}@endif @else @if($slang == 2){{ $product['item']['name_ar'] }}@else{{ $product['item']['name'] }}@endif @endif",
+                                affiliation: "{{ $gs->title ?? 'Store' }}",
+                                price: {{ $product['item']['price'] * $curr->value }},
+                                quantity: {{ $product['qty'] }}
+                            }
+                            @php $cartIndex++; @endphp
+                        @endforeach
+                    @endif
+                ]
+            }
+        });
+    </script>
+    <!-- End GTM Data Layer - Begin Checkout -->
+
     <!-- Check Out Area Start -->
     <section class="checkout">
         <div class="container">

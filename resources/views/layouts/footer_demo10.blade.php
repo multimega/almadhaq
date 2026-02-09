@@ -684,6 +684,93 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
     });
 </script>
 
+<!-- GTM Data Layer - Add to Cart Event -->
+<script>
+$(document).ready(function() {
+    // Listen for add to cart clicks
+    $(document).on('click', '.add-cart, .add-to-cart, .btn-add-cart', function(e) {
+        var $btn = $(this);
+        var productId = $btn.data('href');
+        
+        // Extract product data from the parent product container
+        var $product = $btn.closest('.product, .product-default, .item, .col-grid');
+        
+        if ($product.length > 0) {
+            var productName = $product.find('.product-title, .name, h2 a, h5.name').text().trim();
+            var productPrice = $product.find('.product-price, .price').text().trim();
+            var productCategory = $product.find('.product-category, .category-list a').text().trim();
+            
+            // Clean price (remove currency symbols and convert to number)
+            var priceValue = parseFloat(productPrice.replace(/[^0-9.]/g, ''));
+            
+            // Push to dataLayer
+            if (productName && !isNaN(priceValue)) {
+                window.dataLayer = window.dataLayer || [];
+                dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object
+                dataLayer.push({
+                    event: "add_to_cart",
+                    ecommerce: {
+                        currency: "{{ $curr->name ?? 'USD' }}",
+                        value: priceValue,
+                        items: [{
+                            item_name: productName,
+                            price: priceValue,
+                            item_category: productCategory,
+                            quantity: 1
+                        }]
+                    }
+                });
+                
+                console.log('GTM add_to_cart event fired:', productName);
+            }
+        }
+    });
+    
+    // Listen for product clicks (select_item event)
+    $(document).on('click', '.product a, .product-default a, .item a, .col-grid a', function(e) {
+        var $link = $(this);
+        
+        // Skip if it's an add to cart button or wishlist/compare
+        if ($link.hasClass('add-cart') || $link.hasClass('add-to-cart') || 
+            $link.hasClass('add-wishlist') || $link.hasClass('add-compare') || 
+            $link.hasClass('quick-view')) {
+            return;
+        }
+        
+        var $product = $link.closest('.product, .product-default, .item, .col-grid');
+        
+        if ($product.length > 0) {
+            var productName = $product.find('.product-title, .name, h2 a, h5.name').text().trim();
+            var productPrice = $product.find('.product-price, .price').text().trim();
+            var productCategory = $product.find('.product-category, .category-list a').text().trim();
+            
+            // Clean price
+            var priceValue = parseFloat(productPrice.replace(/[^0-9.]/g, ''));
+            
+            // Push select_item event
+            if (productName && !isNaN(priceValue)) {
+                window.dataLayer = window.dataLayer || [];
+                dataLayer.push({ ecommerce: null });
+                dataLayer.push({
+                    event: "select_item",
+                    ecommerce: {
+                        item_list_id: "product_list",
+                        item_list_name: "Product List",
+                        items: [{
+                            item_name: productName,
+                            price: priceValue,
+                            item_category: productCategory
+                        }]
+                    }
+                });
+                
+                console.log('GTM select_item event fired:', productName);
+            }
+        }
+    });
+});
+</script>
+<!-- End GTM Data Layer - Add to Cart Event -->
 
 </body>
 

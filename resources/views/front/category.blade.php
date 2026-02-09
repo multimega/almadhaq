@@ -759,6 +759,41 @@ $lang  = DB::table('languages')->where('is_default','=',1)->first();
 
 </script>
 
-
+<!-- GTM Data Layer - View Item List (Category) -->
+<script>
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
+    dataLayer.push({
+        event: "view_item_list",
+        ecommerce: {
+            item_list_id: "@if(!empty($cat)){{ $cat->slug }}@else category_page @endif",
+            item_list_name: "@if(!empty($cat))@if(!$slang)@if($lang->id == 2){{ $cat->name_ar }}@else{{ $cat->name }}@endif @else @if($slang == 2){{ $cat->name_ar }}@else{{ $cat->name }}@endif @endif @else Category Page @endif",
+            items: [
+                @if(count($prods) > 0)
+                    @foreach($prods as $key => $prod)
+                        @if($key > 0),@endif
+                        {
+                            item_id: "{{ $prod->sku ?? $prod->id }}",
+                            item_name: "@if(!$slang)@if($lang->id == 2){{ $prod->name_ar }}@else{{ $prod->name }}@endif @else @if($slang == 2){{ $prod->name_ar }}@else{{ $prod->name }}@endif @endif",
+                            affiliation: "{{ $gs->title ?? 'Store' }}",
+                            @if(!empty($prod->category))
+                            item_category: "@if(!$slang)@if($lang->id == 2){{ $prod->category->name_ar }}@else{{ $prod->category->name }}@endif @else @if($slang == 2){{ $prod->category->name_ar }}@else{{ $prod->category->name }}@endif @endif",
+                            @endif
+                            @if(!empty($prod->brand))
+                            item_brand: "{{ $prod->brand->name }}",
+                            @endif
+                            item_list_id: "@if(!empty($cat)){{ $cat->slug }}@else category_page @endif",
+                            item_list_name: "@if(!empty($cat))@if(!$slang)@if($lang->id == 2){{ $cat->name_ar }}@else{{ $cat->name }}@endif @else @if($slang == 2){{ $cat->name_ar }}@else{{ $cat->name }}@endif @endif @else Category Page @endif",
+                            price: {{ $prod->price * $curr->value }},
+                            index: {{ $key }},
+                            quantity: 1
+                        }
+                    @endforeach
+                @endif
+            ]
+        }
+    });
+</script>
+<!-- End GTM Data Layer - View Item List -->
 
 @endsection
