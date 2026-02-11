@@ -2693,6 +2693,21 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 
 	@yield('scripts')
 	@yield('js')
+	@php
+		$showGtmSignUp = Session::pull('gtm_sign_up');
+	@endphp
+	@if($showGtmSignUp)
+	<!-- GTM Data Layer - Sign Up Event -->
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		dataLayer.push({
+			event: 'sign_up',
+			method: 'form'
+		});
+		console.log('GTM sign_up event fired');
+	</script>
+	<!-- End GTM Data Layer - Sign Up Event -->
+	@endif
     <script>
        /* $(document).on("click", ".quick-view", function () {
       var $this = $("#quickview");

@@ -3,7 +3,12 @@
 
 $slang = Session::get('language');
 $lang  = DB::table('languages')->where('is_default','=',1)->first();
- $tool = DB::table('seotools')->find(1);
+$tool = DB::table('seotools')->find(1);
+if (Session::has('currency')) {
+    $curr = App\Models\Currency::find(Session::get('currency'));
+} else {
+    $curr = App\Models\Currency::where('is_default','=',1)->first();
+}
 
 @endphp
 
