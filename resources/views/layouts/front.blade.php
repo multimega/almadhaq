@@ -14,18 +14,16 @@
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-KJG2XH2S');</script>
   <!-- End Google Tag Manager -->
-  <!-- GTM dataLayer push helper: pushes both event and _event so GTM triggers (Custom Event) and GA4/Snap work -->
+  <!-- GTM dataLayer: shared helper defined ONCE, available globally before any event calls -->
   <script>
+  window.dataLayer = window.dataLayer || [];
   function pushDL(eventName, data) {
-    window.dataLayer = window.dataLayer || [];
     var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {
       for (var k in data) { if (data.hasOwnProperty(k) && data[k] !== undefined && data[k] !== '') payload[k] = data[k]; }
     }
     window.dataLayer.push(payload);
-    if (typeof window !== 'undefined' && window.console && window.console.log) {
-      try { window.console.log('[DL PUSH]', payload); } catch (e) {}
-    }
+    if (window.console && window.console.log) { try { window.console.log('[DL PUSH]', eventName, payload); } catch (e) {} }
   }
   </script>
 	@php 
@@ -2708,25 +2706,33 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 	@yield('scripts')
 	@yield('js')
 	@php
-		$showGtmSignUp = Session::pull('gtm_sign_up');
-		$gtmSignUpData = Session::pull('gtm_sign_up_data');
+		$showGtmSignUp = Session::get('gtm_sign_up');
+		$gtmSignUpData = Session::get('gtm_sign_up_data');
 	@endphp
 	@if($showGtmSignUp)
-	<!-- GTM Data Layer - Sign Up Event (only after registration success; session pulled = guard against refresh duplicate) -->
+	<!-- GTM Data Layer - Sign Up (only after registration success; sessionStorage prevents duplicate on refresh) -->
 	<script>
 		(function(){
+			try {
+				if (sessionStorage.getItem('signup_fired') === '1') {
+					if (window.console && window.console.log) window.console.log('[GTM] sign_up skipped (signup_fired already set)');
+					return;
+				}
+			} catch (e) {}
 			var data = {
 				user_email: @json($gtmSignUpData['user_email'] ?? null),
 				user_phone: @json($gtmSignUpData['user_phone'] ?? null)
 			};
+			if (window.console && window.console.log) window.console.log('[GTM] sign_up firing (registration success)');
 			if (typeof pushDL === 'function') {
 				pushDL('sign_up', data);
 			} else {
 				window.dataLayer = window.dataLayer || [];
 				var p = { event: 'sign_up', _event: 'sign_up', user_email: data.user_email || null, user_phone: data.user_phone || null };
 				window.dataLayer.push(p);
-				if (window.console && window.console.log) window.console.log('[DL PUSH]', p);
+				if (window.console && window.console.log) window.console.log('[DL PUSH] sign_up', p);
 			}
+			try { sessionStorage.setItem('signup_fired', '1'); } catch (e) {}
 			if (typeof snaptr === 'function' && typeof snapSignUp === 'function') {
 				snapSignUp({ sign_up_method: 'form' });
 			}
@@ -2734,6 +2740,112 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 	</script>
 	<!-- End GTM Data Layer - Sign Up Event -->
 	@endif
+    <!-- GTM Data Layer - Add to Cart (loaded on all front pages: product, category, cart, checkout, login, register) -->
+    <script>
+    (function() {
+        var currency = "{{ $curr->name ?? 'SAR' }}";
+        var ADD_CART_COOLDOWN_MS = 2500;
+        var addCartSelectors = '.add-cart, .add-to-cart, .btn-add-cart, button[name="add-to-cart"], a[data-href*="addcart"], span.add-to-cart-btn[data-href*="addcart"]';
+        function isAddCartUrl(url) {
+            if (!url) return false;
+            var u = String(url);
+            return u.indexOf('addcart') !== -1 || u.indexOf('cart/add') !== -1 || u.indexOf('add-to-cart') !== -1 || u.indexOf('addtocart') !== -1;
+        }
+        function capturePendingFromEl($btn) {
+            var href = $btn.attr('data-href') || $btn.data('href') || ($btn.attr('href') || '');
+            var match = href && href.match(/\/(?:addcart|addtocart|cart\/add|add-to-cart)[\/\?]*(?:.*\/)?(\d+)/i);
+            var productId = match ? match[1] : (href && href.match(/(\d+)/) ? href.match(/(\d+)/)[1] : '');
+            var $product = $btn.closest('.product, .product-default, .item, .col-grid, .single-product, .product-single');
+            var productName = '', productPrice = '', productCategory = '';
+            if ($product.length) {
+                productName = $product.find('.product-title, .name, h2 a, h5.name, .product-name').first().text().trim();
+                productPrice = $product.find('.product-price, .price, .amount').first().text().trim();
+                productCategory = $product.find('.product-category, .category-list a, .item_category').first().text().trim();
+            }
+            var priceValue = parseFloat(String(productPrice).replace(/[^0-9.]/g, '')) || 0;
+            window._dlAddCartPending = {
+                item_id: productId ? String(productId) : '',
+                item_name: productName || null,
+                item_category: productCategory || null,
+                price: !isNaN(priceValue) ? priceValue : 0,
+                quantity: 1,
+                currency: currency,
+                requestId: Date.now()
+            };
+        }
+        function fireAddToCart() {
+            var pending = window._dlAddCartPending;
+            if (!pending) return;
+            var now = Date.now();
+            if (window._dlAddCartLastFired && (now - window._dlAddCartLastFired) < ADD_CART_COOLDOWN_MS) {
+                window._dlAddCartPending = null;
+                return;
+            }
+            window._dlAddCartPending = null;
+            window._dlAddCartLastFired = now;
+            var value = (typeof pending.price === 'number' ? pending.price : 0) * (pending.quantity || 1);
+            var items = [{ item_id: pending.item_id || undefined, item_name: pending.item_name || undefined, item_category: pending.item_category || undefined, price: typeof pending.price === 'number' ? pending.price : 0, quantity: pending.quantity || 1 }];
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            var payload = { event: 'add_to_cart', _event: 'add_to_cart', currency: pending.currency || 'SAR', value: value, items: items, ecommerce: { currency: pending.currency || 'SAR', value: value, items: items } };
+            window.dataLayer.push(payload);
+            if (window.console && window.console.log) window.console.log('[DL PUSH] add_to_cart', payload);
+            if (typeof snaptr === 'function') { snaptr('track', 'ADD_CART', { price: value, currency: payload.currency, item_ids: pending.item_id ? [pending.item_id] : [], item_category: pending.item_category || '', number_items: pending.quantity || 1 }); }
+        }
+        function onAddCartSuccess() {
+            if (!window._dlAddCartPending) return;
+            var response = arguments.length && arguments[2] && arguments[2].responseJSON !== undefined ? arguments[2].responseJSON : (arguments[1] && arguments[1].responseJSON);
+            var body = (arguments[1] && arguments[1].responseText) ? arguments[1].responseText : '';
+            var ok = Array.isArray(response) || (response && typeof response === 'object' && !response.errors);
+            if (!ok && body) { try { var parsed = JSON.parse(body); ok = Array.isArray(parsed) || (parsed && !parsed.errors); } catch (e) {} }
+            if (ok) fireAddToCart();
+        }
+        if (typeof jQuery !== 'undefined') {
+            jQuery(document).ready(function($) {
+                if (window.console && window.console.log) window.console.log('[GTM] add_to_cart handlers bound (jQuery)', addCartSelectors);
+                $(document).on('click', addCartSelectors, function() { capturePendingFromEl($(this)); });
+                $(document).ajaxComplete(function(e, xhr, opts) {
+                    if (!isAddCartUrl(opts && opts.url)) return;
+                    onAddCartSuccess(e, xhr, opts);
+                });
+            });
+        }
+        var _xhrOpen = window.XMLHttpRequest && XMLHttpRequest.prototype.open;
+        if (_xhrOpen) {
+            XMLHttpRequest.prototype.open = function(method, url) {
+                this._dlUrl = url;
+                return _xhrOpen.apply(this, arguments);
+            };
+        }
+        var _xhrSend = window.XMLHttpRequest && XMLHttpRequest.prototype.send;
+        if (_xhrSend) {
+            XMLHttpRequest.prototype.send = function() {
+                var xhr = this;
+                if (isAddCartUrl(xhr._dlUrl)) {
+                    xhr.addEventListener('load', function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            var ok = false;
+                            try { var r = JSON.parse(xhr.responseText); ok = Array.isArray(r) || (r && !r.errors); } catch (e) {}
+                            if (ok) fireAddToCart();
+                        }
+                    });
+                }
+                return _xhrSend.apply(this, arguments);
+            };
+        }
+        if (window.fetch) {
+            var _fetch = window.fetch;
+            window.fetch = function(url, opts) {
+                var p = _fetch.apply(this, arguments);
+                if (isAddCartUrl(url)) {
+                    p.then(function(res) { if (res.ok) res.clone().text().then(function(t) { try { var r = JSON.parse(t); if (Array.isArray(r) || (r && !r.errors)) fireAddToCart(); } catch (e) {} }); });
+                }
+                return p;
+            };
+        }
+    })();
+    </script>
+    <!-- End GTM Data Layer - Add to Cart -->
     <script>
        /* $(document).on("click", ".quick-view", function () {
       var $this = $("#quickview");

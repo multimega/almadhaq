@@ -649,17 +649,17 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 <script src="{{ asset('assets/front/js/main.js') }}"></script>
 <!-- custom -->
 <script src="{{ asset('assets/front/js/custom.js') }}"></script>
-<!-- GTM dataLayer push helper: pushes both event and _event for GTM triggers + GA4/Snap -->
+<!-- GTM dataLayer: define pushDL only if not already defined (e.g. by front layout) -->
 <script>
+window.dataLayer = window.dataLayer || [];
 if (typeof pushDL === 'undefined') {
   function pushDL(eventName, data) {
-    window.dataLayer = window.dataLayer || [];
     var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {
       for (var k in data) { if (data.hasOwnProperty(k) && data[k] !== undefined && data[k] !== '') payload[k] = data[k]; }
     }
     window.dataLayer.push(payload);
-    if (window.console && window.console.log) { try { window.console.log('[DL PUSH]', payload); } catch (e) {} }
+    if (window.console && window.console.log) { try { window.console.log('[DL PUSH]', eventName, payload); } catch (e) {} }
   }
 }
 </script>
@@ -698,11 +698,12 @@ if (typeof pushDL === 'undefined') {
     });
 </script>
 
-<!-- GTM Data Layer - Add to Cart (fire only after successful add; GA4 ecommerce + duplicate prevention) -->
+<!-- GTM Data Layer - Add to Cart (demo10 footer: fire only after success; same logic as front layout) -->
 <script>
 $(document).ready(function() {
+    if (window.console && window.console.log) window.console.log('[GTM] add_to_cart handlers bound (footer_demo10)');
     var currency = "{{ $curr->name ?? 'SAR' }}";
-    var ADD_CART_COOLDOWN_MS = 2000;
+    var ADD_CART_COOLDOWN_MS = 2500;
     function isAddCartUrl(url) {
         if (!url) return false;
         var u = url.toString();
@@ -762,6 +763,7 @@ $(document).ready(function() {
             _event: 'add_to_cart',
             currency: pending.currency || 'SAR',
             value: value,
+            items: items,
             ecommerce: {
                 currency: pending.currency || 'SAR',
                 value: value,
@@ -769,7 +771,7 @@ $(document).ready(function() {
             }
         };
         window.dataLayer.push(payload);
-        if (window.console && window.console.log) window.console.log('[DL PUSH]', payload);
+        if (window.console && window.console.log) window.console.log('[DL PUSH] add_to_cart', payload);
         if (typeof snaptr === 'function') {
             snaptr('track', 'ADD_CART', { price: value, currency: payload.currency, item_ids: pending.item_id ? [pending.item_id] : [], item_category: pending.item_category || '', number_items: pending.quantity || 1 });
         }
