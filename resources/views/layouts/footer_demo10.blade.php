@@ -720,8 +720,19 @@ $(document).ready(function() {
                         }]
                     }
                 });
-                
                 console.log('GTM add_to_cart event fired:', productName);
+                // Fire Snap Pixel ADD_CART
+                if (typeof snaptr === 'function') {
+                    var snapItemIds = (productId && productId.length) ? [productId] : [];
+                    snaptr('track', 'ADD_CART', {
+                        price: priceValue,
+                        currency: "{{ $curr->name ?? 'USD' }}",
+                        item_ids: snapItemIds,
+                        item_category: productCategory || '',
+                        number_items: 1
+                    });
+                    console.log('Snap Pixel ADD_CART fired:', productName);
+                }
             }
         }
     });

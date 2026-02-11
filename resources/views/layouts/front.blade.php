@@ -2705,6 +2705,11 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 			method: 'form'
 		});
 		console.log('GTM sign_up event fired');
+		// Fire Snap Pixel SIGN_UP
+		if (typeof snaptr === 'function' && typeof snapSignUp === 'function') {
+			snapSignUp({ sign_up_method: 'form' });
+			console.log('Snap Pixel SIGN_UP fired');
+		}
 	</script>
 	<!-- End GTM Data Layer - Sign Up Event -->
 	@endif

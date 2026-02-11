@@ -299,6 +299,26 @@ $lang = DB::table('languages')->where('is_default', '=', 1)->first();
         }
     });
     console.log('GTM purchase event fired for order: {{ $order->order_number }}');
+    // Fire Snap Pixel PURCHASE
+    if (typeof snaptr === 'function') {
+        var snapItemIds = [];
+        @if($order->cart)
+            @php $orderCart = json_decode($order->cart, true); @endphp
+            @if(!empty($orderCart['items']))
+                @foreach($orderCart['items'] as $item)
+                    snapItemIds.push("{{ $item['item']['sku'] ?? $item['item']['id'] }}");
+                @endforeach
+            @endif
+        @endif
+        snaptr('track', 'PURCHASE', {
+            price: {{ $order->pay_amount }},
+            currency: "{{ $order->currency_sign ?? 'USD' }}",
+            transaction_id: "{{ $order->order_number }}",
+            item_ids: snapItemIds,
+            number_items: snapItemIds.length
+        });
+        console.log('Snap Pixel PURCHASE fired for order: {{ $order->order_number }}');
+    }
 </script>
 <!-- End GTM Data Layer - Purchase Event -->
 
