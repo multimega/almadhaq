@@ -20,7 +20,10 @@
   function pushDL(eventName, data) {
     var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {
-      for (var k in data) { if (data.hasOwnProperty(k) && data[k] !== undefined && data[k] !== '') payload[k] = data[k]; }
+      for (var k in data) {
+        if (data.hasOwnProperty(k))
+          payload[k] = (data[k] === undefined || data[k] === '') ? null : data[k];
+      }
     }
     window.dataLayer.push(payload);
     if (window.console && window.console.log) { try { window.console.log('[DL PUSH]', eventName, payload); } catch (e) {} }
@@ -2707,10 +2710,10 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 	@yield('js')
 	@php
 		$showGtmSignUp = Session::get('gtm_sign_up');
-		$gtmSignUpData = Session::get('gtm_sign_up_data');
+		$gtmSignUpData = Session::get('gtm_sign_up_data') ?? [];
 	@endphp
 	@if($showGtmSignUp)
-	<!-- GTM Data Layer - Sign Up (only after registration success; sessionStorage prevents duplicate on refresh) -->
+	<!-- GTM Data Layer - Sign Up (fire even if email not used; user_email/user_phone may be null) -->
 	<script>
 		(function(){
 			try {
@@ -2728,7 +2731,7 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 				pushDL('sign_up', data);
 			} else {
 				window.dataLayer = window.dataLayer || [];
-				var p = { event: 'sign_up', _event: 'sign_up', user_email: data.user_email || null, user_phone: data.user_phone || null };
+				var p = { event: 'sign_up', _event: 'sign_up', user_email: data.user_email != null ? data.user_email : null, user_phone: data.user_phone != null ? data.user_phone : null };
 				window.dataLayer.push(p);
 				if (window.console && window.console.log) window.console.log('[DL PUSH] sign_up', p);
 			}

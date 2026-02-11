@@ -317,5 +317,19 @@ $curr = App\Models\Currency::where('is_default','=',1)->first();
   price: '{{ round(App\Models\Product::getPurePrice($totalPrice)) }}',
 });
 </script>
-
+@if(!empty($gtmAddToCart))
+{{-- GTM add_to_cart when add was done via redirect (success page state) --}}
+<script>
+(function(){
+  window.dataLayer = window.dataLayer || [];
+  var pending = @json($gtmAddToCart);
+  var value = (typeof pending.price === 'number' ? pending.price : 0) * (pending.quantity || 1);
+  var items = [{ item_id: pending.item_id || undefined, item_name: pending.item_name || undefined, item_category: pending.item_category || undefined, price: typeof pending.price === 'number' ? pending.price : 0, quantity: pending.quantity || 1 }];
+  window.dataLayer.push({ ecommerce: null });
+  var payload = { event: 'add_to_cart', _event: 'add_to_cart', currency: pending.currency || 'SAR', value: value, items: items, ecommerce: { currency: pending.currency || 'SAR', value: value, items: items } };
+  window.dataLayer.push(payload);
+  if (window.console && window.console.log) window.console.log('[DL PUSH] add_to_cart (from redirect)', payload);
+})();
+</script>
+@endif
 @endsection

@@ -656,7 +656,10 @@ if (typeof pushDL === 'undefined') {
   function pushDL(eventName, data) {
     var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {
-      for (var k in data) { if (data.hasOwnProperty(k) && data[k] !== undefined && data[k] !== '') payload[k] = data[k]; }
+      for (var k in data) {
+        if (data.hasOwnProperty(k))
+          payload[k] = (data[k] === undefined || data[k] === '') ? null : data[k];
+      }
     }
     window.dataLayer.push(payload);
     if (window.console && window.console.log) { try { window.console.log('[DL PUSH]', eventName, payload); } catch (e) {} }

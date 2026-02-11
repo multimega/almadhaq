@@ -146,7 +146,8 @@ class CartController extends Controller
 
 
         // dd($products);
-        return view('front.cart', compact('products', 'totalPrice', 'mainTotal', 'tx'));
+        $gtmAddToCart = Session::get('gtm_add_to_cart');
+        return view('front.cart', compact('products', 'totalPrice', 'mainTotal', 'tx', 'gtmAddToCart'));
     }
 
     public function cart_34($lang)
@@ -416,7 +417,7 @@ class CartController extends Controller
         return redirect()->route('front.cart', $lang);
     }
 
-    public function addcart($id)
+    public function addcart(Request $request, $id)
     {
         $prod = Product::where('id', '=', $id)->first(['id', 'user_id', 'slug', 'name', 'name_ar', 'erp_id', 'photo', 'free_ship', 'feature', 'trial_period', 'subscription_period', 'subscription_type', 'size', 'size_qty', 'size_price', 'color', 'price', 'stock', 'type', 'file', 'link', 'license', 'license_qty', 'measure', 'scale', 'whole_sell_qty', 'whole_sell_discount', 'attributes']);
 
@@ -555,6 +556,24 @@ class CartController extends Controller
         }
 
         $data[0] = count($cart->items);
+
+        // If add-to-cart was a full-page request (e.g. redirect), flash item for GTM and redirect to cart
+        if (!$request->ajax() && !$request->wantsJson()) {
+            $langRow = Session::has('language')
+                ? DB::table('languages')->where('id', Session::get('language'))->first()
+                : DB::table('languages')->where('is_default', 1)->first();
+            $sign = $langRow ? $langRow->sign : 'en';
+            $curr = Session::has('currency') ? Currency::find(Session::get('currency')) : Currency::where('is_default', 1)->first();
+            Session::flash('gtm_add_to_cart', [
+                'item_id'       => (string) $prod->id,
+                'item_name'     => $prod->name ?? $prod->name_ar ?? null,
+                'item_category' => null,
+                'price'         => (float) $prod->price,
+                'quantity'      => 1,
+                'currency'      => $curr ? $curr->name : 'SAR',
+            ]);
+            return redirect()->route('front.cart', $sign);
+        }
 
         return response()->json($data);
     }

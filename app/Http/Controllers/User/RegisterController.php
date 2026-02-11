@@ -138,6 +138,11 @@ class RegisterController extends Controller
 				$notification->user_id = $user->id;
 				$notification->save();
 				Auth::guard('web')->login($user);
+				Session::flash('gtm_sign_up', true);
+				Session::flash('gtm_sign_up_data', [
+					'user_email' => $user->email ?? null,
+					'user_phone' => $user->phone ?? null,
+				]);
 				return redirect()->route('user-dashboard')->with('success', 'Email Verified Successfully');
 			}
 		} else {
