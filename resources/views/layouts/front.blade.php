@@ -14,6 +14,20 @@
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-KJG2XH2S');</script>
   <!-- End Google Tag Manager -->
+  <!-- GTM dataLayer push helper (Snap Pixel / GA triggers on _event) -->
+  <script>
+  function pushDL(eventName, data) {
+    window.dataLayer = window.dataLayer || [];
+    var payload = { _event: eventName };
+    if (data && typeof data === 'object') {
+      for (var k in data) { if (data.hasOwnProperty(k) && data[k] !== undefined && data[k] !== '') payload[k] = data[k]; }
+    }
+    window.dataLayer.push(payload);
+    if (typeof window !== 'undefined' && window.console && window.console.log) {
+      try { window.console.log('[DL PUSH]', payload); } catch (e) {}
+    }
+  }
+  </script>
 	@php 
 
 $slang = Session::get('language');
@@ -2695,21 +2709,28 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 	@yield('js')
 	@php
 		$showGtmSignUp = Session::pull('gtm_sign_up');
+		$gtmSignUpData = Session::pull('gtm_sign_up_data');
 	@endphp
 	@if($showGtmSignUp)
-	<!-- GTM Data Layer - Sign Up Event -->
+	<!-- GTM Data Layer - Sign Up Event (_event = "Sign up" for GTM trigger) -->
 	<script>
-		window.dataLayer = window.dataLayer || [];
-		dataLayer.push({
-			event: 'sign_up',
-			method: 'form'
-		});
-		console.log('GTM sign_up event fired');
-		// Fire Snap Pixel SIGN_UP
-		if (typeof snaptr === 'function' && typeof snapSignUp === 'function') {
-			snapSignUp({ sign_up_method: 'form' });
-			console.log('Snap Pixel SIGN_UP fired');
-		}
+		(function(){
+			var data = {
+				event_source: 'signup_form',
+				user_email: @json($gtmSignUpData['user_email'] ?? null),
+				user_phone: @json($gtmSignUpData['user_phone'] ?? null)
+			};
+			if (typeof pushDL === 'function') {
+				pushDL('Sign up', data);
+			} else {
+				window.dataLayer = window.dataLayer || [];
+				window.dataLayer.push({ _event: 'Sign up', event_source: 'signup_form', user_email: data.user_email || null, user_phone: data.user_phone || null });
+				if (window.console && window.console.log) window.console.log('[DL PUSH]', { _event: 'Sign up', event_source: 'signup_form', user_email: data.user_email, user_phone: data.user_phone });
+			}
+			if (typeof snaptr === 'function' && typeof snapSignUp === 'function') {
+				snapSignUp({ sign_up_method: 'form' });
+			}
+		})();
 	</script>
 	<!-- End GTM Data Layer - Sign Up Event -->
 	@endif

@@ -262,63 +262,56 @@ $lang = DB::table('languages')->where('is_default', '=', 1)->first();
 
 @section('scripts')
 
-<!-- GTM Data Layer - Purchase Event -->
+<!-- GTM Data Layer - Purchase Event (_event = "purchase" for GTM trigger) -->
+@php
+    $orderCart = $order->cart ? json_decode($order->cart, true) : null;
+    $orderItems = isset($orderCart['items']) ? $orderCart['items'] : [];
+    $orderItemIds = array_map(function($item) {
+        return $item['item']['sku'] ?? $item['item']['id'] ?? null;
+    }, $orderItems);
+    $orderItemIds = array_values(array_filter($orderItemIds));
+    $orderUserEmail = optional($order->user)->email ?? null;
+@endphp
 <script>
-    window.dataLayer = window.dataLayer || [];
-    dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
-    dataLayer.push({
-        event: "purchase",
-        ecommerce: {
-            transaction_id: "{{ $order->order_number }}",
-            value: {{ $order->pay_amount }},
-            tax: {{ $order->tax ?? 0 }},
-            shipping: {{ $order->shipping_cost ?? 0 }},
-            currency: "{{ $order->currency_sign ?? 'USD' }}",
-            @if(!empty($order->coupon_code))
-            coupon: "{{ $order->coupon_code }}",
-            @endif
-            items: [
-                @php $purchaseIndex = 0; @endphp
-                @if($order->cart)
-                    @php $cart = json_decode($order->cart, true); @endphp
-                    @if(isset($cart['items']))
-                        @foreach($cart['items'] as $item)
-                            @if($purchaseIndex > 0),@endif
-                            {
-                                item_id: "{{ $item['item']['sku'] ?? $item['item']['id'] }}",
-                                item_name: "@if(!$slang)@if($lang->id == 2){{ $item['item']['name_ar'] ?? $item['item']['name'] }}@else{{ $item['item']['name'] }}@endif @else @if($slang == 2){{ $item['item']['name_ar'] ?? $item['item']['name'] }}@else{{ $item['item']['name'] }}@endif @endif",
-                                affiliation: "{{ $gs->title ?? 'Store' }}",
-                                price: {{ $item['price'] }},
-                                quantity: {{ $item['qty'] }}
-                            }
-                            @php $purchaseIndex++; @endphp
-                        @endforeach
-                    @endif
-                @endif
-            ]
+(function(){
+    var transactionId = "{{ $order->order_number }}";
+    var storageKey = 'dl_purchase_' + transactionId;
+    try {
+        if (window.sessionStorage && window.sessionStorage.getItem(storageKey)) {
+            return; // already fired for this order
         }
-    });
-    console.log('GTM purchase event fired for order: {{ $order->order_number }}');
-    // Fire Snap Pixel PURCHASE
-    if (typeof snaptr === 'function') {
-        var snapItemIds = [];
-        @if($order->cart)
-            @php $orderCart = json_decode($order->cart, true); @endphp
-            @if(!empty($orderCart['items']))
-                @foreach($orderCart['items'] as $item)
-                    snapItemIds.push("{{ $item['item']['sku'] ?? $item['item']['id'] }}");
-                @endforeach
-            @endif
-        @endif
-        snaptr('track', 'PURCHASE', {
-            price: {{ $order->pay_amount }},
-            currency: "{{ $order->currency_sign ?? 'USD' }}",
-            transaction_id: "{{ $order->order_number }}",
-            item_ids: snapItemIds,
-            number_items: snapItemIds.length
-        });
-        console.log('Snap Pixel PURCHASE fired for order: {{ $order->order_number }}');
+    } catch (e) {}
+    var payload = {
+        _event: 'purchase',
+        transaction_id: transactionId,
+        user_email: @json($orderUserEmail),
+        user_phone: @json($order->customer_phone ?? null),
+        number_items: {{ count($orderItems) }},
+        price: {{ (float) $order->pay_amount }},
+        currency: "{{ $order->currency_sign ?? 'SAR' }}",
+        item_ids: @json($orderItemIds),
+        item_category: null
+    };
+    if (typeof pushDL === 'function') {
+        pushDL('purchase', payload);
+    } else {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(payload);
+        if (window.console && window.console.log) window.console.log('[DL PUSH]', payload);
     }
+    try {
+        if (window.sessionStorage) window.sessionStorage.setItem(storageKey, '1');
+    } catch (e) {}
+    if (typeof snaptr === 'function') {
+        snaptr('track', 'PURCHASE', {
+            price: payload.price,
+            currency: payload.currency,
+            transaction_id: payload.transaction_id,
+            item_ids: payload.item_ids,
+            number_items: payload.number_items
+        });
+    }
+})();
 </script>
 <!-- End GTM Data Layer - Purchase Event -->
 

@@ -117,6 +117,10 @@ class RegisterController extends Controller
 			$usrid = Auth::guard('web')->user()->id;
 			$this->storeCart($usrid);
 			Session::put('gtm_sign_up', true);
+			Session::put('gtm_sign_up_data', [
+				'user_email' => $request->email ?? $request->user_email ?? null,
+				'user_phone' => $request->phone ?? $request->user_phone ?? null,
+			]);
 			return response()->json(1);
 		}
 	}
