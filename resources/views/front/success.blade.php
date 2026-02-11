@@ -262,53 +262,63 @@ $lang = DB::table('languages')->where('is_default', '=', 1)->first();
 
 @section('scripts')
 
-<!-- GTM Data Layer - Purchase Event (_event = "purchase" for GTM trigger) -->
+<!-- GTM Data Layer - Purchase Event (confirmation page only; sessionStorage guard prevents duplicate on refresh) -->
 @php
     $orderCart = $order->cart ? json_decode($order->cart, true) : null;
     $orderItems = isset($orderCart['items']) ? $orderCart['items'] : [];
-    $orderItemIds = array_map(function($item) {
-        return $item['item']['sku'] ?? $item['item']['id'] ?? null;
-    }, $orderItems);
-    $orderItemIds = array_values(array_filter($orderItemIds));
+    $orderPurchaseItems = [];
+    foreach ($orderItems as $item) {
+        $orderPurchaseItems[] = [
+            'item_id' => $item['item']['sku'] ?? $item['item']['id'] ?? null,
+            'item_name' => $item['item']['name'] ?? ($item['item']['name_ar'] ?? null),
+            'item_category' => null,
+            'price' => isset($item['price']) ? (float) $item['price'] : 0,
+            'quantity' => isset($item['qty']) ? (int) $item['qty'] : 1
+        ];
+    }
     $orderUserEmail = optional($order->user)->email ?? null;
 @endphp
 <script>
 (function(){
     var transactionId = "{{ $order->order_number }}";
-    var storageKey = 'dl_purchase_' + transactionId;
+    var storageKey = 'purchase_' + transactionId;
     try {
         if (window.sessionStorage && window.sessionStorage.getItem(storageKey)) {
-            return; // already fired for this order
+            return;
         }
     } catch (e) {}
+    var value = {{ (float) $order->pay_amount }};
+    var currency = "{{ $order->currency_sign ?? 'SAR' }}";
+    var items = @json($orderPurchaseItems);
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
     var payload = {
+        event: 'purchase',
         _event: 'purchase',
         transaction_id: transactionId,
+        currency: currency,
+        value: value,
         user_email: @json($orderUserEmail),
         user_phone: @json($order->customer_phone ?? null),
-        number_items: {{ count($orderItems) }},
-        price: {{ (float) $order->pay_amount }},
-        currency: "{{ $order->currency_sign ?? 'SAR' }}",
-        item_ids: @json($orderItemIds),
-        item_category: null
+        ecommerce: {
+            transaction_id: transactionId,
+            currency: currency,
+            value: value,
+            items: items
+        }
     };
-    if (typeof pushDL === 'function') {
-        pushDL('purchase', payload);
-    } else {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push(payload);
-        if (window.console && window.console.log) window.console.log('[DL PUSH]', payload);
-    }
+    window.dataLayer.push(payload);
+    if (window.console && window.console.log) window.console.log('[DL PUSH]', payload);
     try {
         if (window.sessionStorage) window.sessionStorage.setItem(storageKey, '1');
     } catch (e) {}
     if (typeof snaptr === 'function') {
         snaptr('track', 'PURCHASE', {
-            price: payload.price,
-            currency: payload.currency,
-            transaction_id: payload.transaction_id,
-            item_ids: payload.item_ids,
-            number_items: payload.number_items
+            price: value,
+            currency: currency,
+            transaction_id: transactionId,
+            item_ids: items.map(function(i) { return i.item_id; }).filter(Boolean),
+            number_items: items.reduce(function(s, i) { return s + (i.quantity || 0); }, 0)
         });
     }
 })();

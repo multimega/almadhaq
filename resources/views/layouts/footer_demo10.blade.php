@@ -649,12 +649,12 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 <script src="{{ asset('assets/front/js/main.js') }}"></script>
 <!-- custom -->
 <script src="{{ asset('assets/front/js/custom.js') }}"></script>
-<!-- GTM dataLayer push helper (Snap Pixel / GA triggers on _event) -->
+<!-- GTM dataLayer push helper: pushes both event and _event for GTM triggers + GA4/Snap -->
 <script>
 if (typeof pushDL === 'undefined') {
   function pushDL(eventName, data) {
     window.dataLayer = window.dataLayer || [];
-    var payload = { _event: eventName };
+    var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {
       for (var k in data) { if (data.hasOwnProperty(k) && data[k] !== undefined && data[k] !== '') payload[k] = data[k]; }
     }
@@ -698,16 +698,22 @@ if (typeof pushDL === 'undefined') {
     });
 </script>
 
-<!-- GTM Data Layer - Add to Cart Event (_event = "Add to cart", fire only on success) -->
+<!-- GTM Data Layer - Add to Cart (fire only after successful add; GA4 ecommerce + duplicate prevention) -->
 <script>
 $(document).ready(function() {
     var currency = "{{ $curr->name ?? 'SAR' }}";
-    // Store pending product when user clicks add to cart (for push on AJAX success)
+    var ADD_CART_COOLDOWN_MS = 2000;
+    function isAddCartUrl(url) {
+        if (!url) return false;
+        var u = url.toString();
+        return u.indexOf('addcart') !== -1 || u.indexOf('cart/add') !== -1 || u.indexOf('add-to-cart') !== -1;
+    }
+    // Store pending product on click (for push on AJAX success only)
     $(document).on('click', '.add-cart, .add-to-cart, .btn-add-cart', function() {
         var $btn = $(this);
         var href = $btn.attr('data-href') || $btn.data('href');
-        var match = href && href.match(/\/addcart\/(\d+)/);
-        var productId = match ? match[1] : (href || '');
+        var match = href && href.match(/\/(?:addcart|addtocart|cart\/add|add-to-cart)[\/\?]*(?:.*\/)?(\d+)/i);
+        var productId = match ? match[1] : (href && href.match(/(\d+)/) ? href.match(/(\d+)/)[1] : '');
         var $product = $btn.closest('.product, .product-default, .item, .col-grid');
         if ($product.length) {
             var productName = $product.find('.product-title, .name, h2 a, h5.name').text().trim();
@@ -715,43 +721,57 @@ $(document).ready(function() {
             var productCategory = $product.find('.product-category, .category-list a').text().trim();
             var priceValue = parseFloat(String(productPrice).replace(/[^0-9.]/g, '')) || 0;
             window._dlAddCartPending = {
-                user_email: null,
-                user_phone: null,
-                number_items: 1,
+                item_id: productId ? String(productId) : '',
+                item_name: productName || null,
+                item_category: productCategory || null,
                 price: !isNaN(priceValue) ? priceValue : 0,
+                quantity: 1,
                 currency: currency,
-                item_ids: productId ? [String(productId)] : [],
-                item_category: productCategory || null
+                requestId: Date.now()
             };
         }
     });
-    // Fire "Add to cart" only when addcart request succeeds
+    // Fire only when add-to-cart request succeeds (robust URL match + duplicate prevention)
     $(document).ajaxSuccess(function(event, xhr, opts, data) {
         var url = (opts && opts.url) ? opts.url : '';
-        if (url.indexOf('addcart') === -1) return;
-        var isSuccess = (Array.isArray(data) && data.length >= 0) || (xhr && xhr.responseJSON && Array.isArray(xhr.responseJSON));
+        if (!isAddCartUrl(url)) return;
+        var response = data != null ? data : (xhr && xhr.responseJSON);
+        var isSuccess = Array.isArray(response) || (response && typeof response === 'object' && !response.errors);
         if (!isSuccess) return;
         var pending = window._dlAddCartPending;
         if (!pending) return;
-        window._dlAddCartPending = null;
-        var payload = {
-            user_email: pending.user_email || null,
-            user_phone: pending.user_phone || null,
-            number_items: typeof pending.number_items === 'number' ? pending.number_items : 1,
-            price: typeof pending.price === 'number' ? pending.price : 0,
-            currency: pending.currency || 'SAR',
-            item_ids: Array.isArray(pending.item_ids) ? pending.item_ids : [],
-            item_category: pending.item_category || null
-        };
-        if (typeof pushDL === 'function') {
-            pushDL('Add to cart', payload);
-        } else {
-            window.dataLayer = window.dataLayer || [];
-            window.dataLayer.push({ _event: 'Add to cart', ...payload });
-            if (window.console && window.console.log) window.console.log('[DL PUSH]', { _event: 'Add to cart', ...payload });
+        var now = Date.now();
+        if (window._dlAddCartLastFired && (now - window._dlAddCartLastFired) < ADD_CART_COOLDOWN_MS) {
+            window._dlAddCartPending = null;
+            return;
         }
+        window._dlAddCartPending = null;
+        window._dlAddCartLastFired = now;
+        var value = typeof pending.price === 'number' ? pending.price * (pending.quantity || 1) : 0;
+        var items = [{
+            item_id: pending.item_id || undefined,
+            item_name: pending.item_name || undefined,
+            item_category: pending.item_category || undefined,
+            price: typeof pending.price === 'number' ? pending.price : 0,
+            quantity: typeof pending.quantity === 'number' ? pending.quantity : 1
+        }];
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        var payload = {
+            event: 'add_to_cart',
+            _event: 'add_to_cart',
+            currency: pending.currency || 'SAR',
+            value: value,
+            ecommerce: {
+                currency: pending.currency || 'SAR',
+                value: value,
+                items: items
+            }
+        };
+        window.dataLayer.push(payload);
+        if (window.console && window.console.log) window.console.log('[DL PUSH]', payload);
         if (typeof snaptr === 'function') {
-            snaptr('track', 'ADD_CART', { price: payload.price, currency: payload.currency, item_ids: payload.item_ids, item_category: payload.item_category || '', number_items: payload.number_items });
+            snaptr('track', 'ADD_CART', { price: value, currency: payload.currency, item_ids: pending.item_id ? [pending.item_id] : [], item_category: pending.item_category || '', number_items: pending.quantity || 1 });
         }
     });
     

@@ -14,11 +14,11 @@
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-KJG2XH2S');</script>
   <!-- End Google Tag Manager -->
-  <!-- GTM dataLayer push helper (Snap Pixel / GA triggers on _event) -->
+  <!-- GTM dataLayer push helper: pushes both event and _event so GTM triggers (Custom Event) and GA4/Snap work -->
   <script>
   function pushDL(eventName, data) {
     window.dataLayer = window.dataLayer || [];
-    var payload = { _event: eventName };
+    var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {
       for (var k in data) { if (data.hasOwnProperty(k) && data[k] !== undefined && data[k] !== '') payload[k] = data[k]; }
     }
@@ -2712,20 +2712,20 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 		$gtmSignUpData = Session::pull('gtm_sign_up_data');
 	@endphp
 	@if($showGtmSignUp)
-	<!-- GTM Data Layer - Sign Up Event (_event = "Sign up" for GTM trigger) -->
+	<!-- GTM Data Layer - Sign Up Event (only after registration success; session pulled = guard against refresh duplicate) -->
 	<script>
 		(function(){
 			var data = {
-				event_source: 'signup_form',
 				user_email: @json($gtmSignUpData['user_email'] ?? null),
 				user_phone: @json($gtmSignUpData['user_phone'] ?? null)
 			};
 			if (typeof pushDL === 'function') {
-				pushDL('Sign up', data);
+				pushDL('sign_up', data);
 			} else {
 				window.dataLayer = window.dataLayer || [];
-				window.dataLayer.push({ _event: 'Sign up', event_source: 'signup_form', user_email: data.user_email || null, user_phone: data.user_phone || null });
-				if (window.console && window.console.log) window.console.log('[DL PUSH]', { _event: 'Sign up', event_source: 'signup_form', user_email: data.user_email, user_phone: data.user_phone });
+				var p = { event: 'sign_up', _event: 'sign_up', user_email: data.user_email || null, user_phone: data.user_phone || null };
+				window.dataLayer.push(p);
+				if (window.console && window.console.log) window.console.log('[DL PUSH]', p);
 			}
 			if (typeof snaptr === 'function' && typeof snapSignUp === 'function') {
 				snapSignUp({ sign_up_method: 'form' });
