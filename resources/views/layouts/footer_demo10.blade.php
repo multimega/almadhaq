@@ -701,85 +701,70 @@ if (typeof pushDL === 'undefined') {
     });
 </script>
 
-<!-- GTM Data Layer - Add to Cart (demo10 footer: fire only after success; same logic as front layout) -->
+<!-- GTM Data Layer - Add to Cart (GET navigation: push on click BEFORE browser navigates to /addcart/{id}) -->
+<script>
+(function() {
+    var currency = "{{ $curr->name ?? 'SAR' }}";
+    var addCartSelectors = 'a[href*="/addcart/"], .add-cart, .add-to-cart, .btn-add-cart';
+    var productWrapperSelectors = '.product, .product-default, .item, .col-grid, .product-item';
+
+    function getText(el, selectors) {
+        if (!el) return '';
+        var sel = selectors.split(', ');
+        for (var i = 0; i < sel.length; i++) {
+            var found = el.querySelector(sel[i]);
+            if (found) return (found.textContent || '').trim();
+        }
+        return '';
+    }
+
+    function handleAddToCartClick(e) {
+        var el = e.target.closest && e.target.closest(addCartSelectors);
+        if (!el) return;
+
+        var href = (el.getAttribute && el.getAttribute('data-href')) || el.href || '';
+        var match = href.match(/\/addcart\/(\d+)/);
+        var product_id = match ? match[1] : '';
+
+        var wrapper = el.closest && el.closest(productWrapperSelectors);
+        var product_name = wrapper ? getText(wrapper, '.product-title, .name, h2 a, h5.name, .product-name') : '';
+        var priceText = wrapper ? getText(wrapper, '.product-price, .price, .amount') : '';
+        var product_category = wrapper ? getText(wrapper, '.product-category, .category-list a, .item_category') : '';
+        var price = parseFloat(String(priceText).replace(/[^0-9.]/g, '')) || 0;
+        var quantity = 1;
+
+        window.dataLayer = window.dataLayer || [];
+        if (typeof pushDL === 'function') {
+            pushDL('add_to_cart', {
+                currency: currency,
+                value: price * quantity,
+                items: [{
+                    item_id: product_id,
+                    item_name: product_name || null,
+                    item_category: product_category || null,
+                    price: price,
+                    quantity: quantity
+                }]
+            });
+        } else {
+            var payload = {
+                event: 'add_to_cart',
+                _event: 'add_to_cart',
+                currency: currency,
+                value: price * quantity,
+                items: [{ item_id: product_id, item_name: product_name || null, item_category: product_category || null, price: price, quantity: quantity }]
+            };
+            window.dataLayer.push(payload);
+        }
+        if (window.console && window.console.log) window.console.log('[GTM] add_to_cart pushed before navigation', { product_id: product_id, value: price * quantity });
+    }
+
+    document.addEventListener('click', handleAddToCartClick, false);
+    if (window.console && window.console.log) window.console.log('[GTM] add_to_cart click handler bound (footer_demo10, GET navigation)', addCartSelectors);
+})();
+</script>
 <script>
 $(document).ready(function() {
-    if (window.console && window.console.log) window.console.log('[GTM] add_to_cart handlers bound (footer_demo10)');
-    var currency = "{{ $curr->name ?? 'SAR' }}";
-    var ADD_CART_COOLDOWN_MS = 2500;
-    function isAddCartUrl(url) {
-        if (!url) return false;
-        var u = url.toString();
-        return u.indexOf('addcart') !== -1 || u.indexOf('cart/add') !== -1 || u.indexOf('add-to-cart') !== -1;
-    }
-    // Store pending product on click (for push on AJAX success only)
-    $(document).on('click', '.add-cart, .add-to-cart, .btn-add-cart', function() {
-        var $btn = $(this);
-        var href = $btn.attr('data-href') || $btn.data('href');
-        var match = href && href.match(/\/(?:addcart|addtocart|cart\/add|add-to-cart)[\/\?]*(?:.*\/)?(\d+)/i);
-        var productId = match ? match[1] : (href && href.match(/(\d+)/) ? href.match(/(\d+)/)[1] : '');
-        var $product = $btn.closest('.product, .product-default, .item, .col-grid');
-        if ($product.length) {
-            var productName = $product.find('.product-title, .name, h2 a, h5.name').text().trim();
-            var productPrice = $product.find('.product-price, .price').text().trim();
-            var productCategory = $product.find('.product-category, .category-list a').text().trim();
-            var priceValue = parseFloat(String(productPrice).replace(/[^0-9.]/g, '')) || 0;
-            window._dlAddCartPending = {
-                item_id: productId ? String(productId) : '',
-                item_name: productName || null,
-                item_category: productCategory || null,
-                price: !isNaN(priceValue) ? priceValue : 0,
-                quantity: 1,
-                currency: currency,
-                requestId: Date.now()
-            };
-        }
-    });
-    // Fire only when add-to-cart request succeeds (robust URL match + duplicate prevention)
-    $(document).ajaxSuccess(function(event, xhr, opts, data) {
-        var url = (opts && opts.url) ? opts.url : '';
-        if (!isAddCartUrl(url)) return;
-        var response = data != null ? data : (xhr && xhr.responseJSON);
-        var isSuccess = Array.isArray(response) || (response && typeof response === 'object' && !response.errors);
-        if (!isSuccess) return;
-        var pending = window._dlAddCartPending;
-        if (!pending) return;
-        var now = Date.now();
-        if (window._dlAddCartLastFired && (now - window._dlAddCartLastFired) < ADD_CART_COOLDOWN_MS) {
-            window._dlAddCartPending = null;
-            return;
-        }
-        window._dlAddCartPending = null;
-        window._dlAddCartLastFired = now;
-        var value = typeof pending.price === 'number' ? pending.price * (pending.quantity || 1) : 0;
-        var items = [{
-            item_id: pending.item_id || undefined,
-            item_name: pending.item_name || undefined,
-            item_category: pending.item_category || undefined,
-            price: typeof pending.price === 'number' ? pending.price : 0,
-            quantity: typeof pending.quantity === 'number' ? pending.quantity : 1
-        }];
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        var payload = {
-            event: 'add_to_cart',
-            _event: 'add_to_cart',
-            currency: pending.currency || 'SAR',
-            value: value,
-            items: items,
-            ecommerce: {
-                currency: pending.currency || 'SAR',
-                value: value,
-                items: items
-            }
-        };
-        window.dataLayer.push(payload);
-        if (window.console && window.console.log) window.console.log('[DL PUSH] add_to_cart', payload);
-        if (typeof snaptr === 'function') {
-            snaptr('track', 'ADD_CART', { price: value, currency: payload.currency, item_ids: pending.item_id ? [pending.item_id] : [], item_category: pending.item_category || '', number_items: pending.quantity || 1 });
-        }
-    });
-    
     // Listen for product clicks (select_item event)
     $(document).on('click', '.product a, .product-default a, .item a, .col-grid a', function(e) {
         var $link = $(this);
