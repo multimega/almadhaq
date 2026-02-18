@@ -45,7 +45,6 @@ $curr = App\Models\Currency::where('is_default','=',1)->first();
     /* Cart page: no horizontal scroll, scoped to .cart-page */
     .cart-page { overflow-x: hidden; box-sizing: border-box; }
     .cart-page *, .cart-page *::before, .cart-page *::after { box-sizing: border-box; }
-    .cart-page .container { max-width: 100%; }
     /* Desktop: show table, hide mobile cards */
     .cart-page .cart-table-desktop { display: block; }
     .cart-page .cart-cards-mobile { display: none; }
