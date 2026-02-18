@@ -27,7 +27,7 @@ class LoginController extends Controller
   {
     //--- Validation Section
     $rules = [
-      'name'   => 'required',
+      'phone'   => 'required',
       'password' => 'required'
     ];
 
@@ -39,8 +39,10 @@ class LoginController extends Controller
     }
     //--- Validation Section Ends
 
-    // Attempt to log the user in
-    if (Auth::attempt(['name' => $request->name, 'password' => $request->password, 'status' => 0])) {
+    $normalizedPhone = $this->normalizePhone($request->phone);
+
+    // Attempt to log the user in (phone + password)
+    if (Auth::attempt(['phone' => $normalizedPhone, 'password' => $request->password, 'status' => 0])) {
       // if successful, then redirect to their intended location
 
 
@@ -102,7 +104,7 @@ class LoginController extends Controller
   {
     //--- Validation Section
     $rules = [
-      'name'   => 'required',
+      'phone'   => 'required',
       'password' => 'required'
     ];
 
@@ -114,8 +116,10 @@ class LoginController extends Controller
     }
     //--- Validation Section Ends
 
-    // Attempt to log the user in
-    if (Auth::attempt(['name' => $request->name, 'password' => $request->password, 'status' => 0])) {
+    $normalizedPhone = $this->normalizePhone($request->phone);
+
+    // Attempt to log the user in (phone + password)
+    if (Auth::attempt(['phone' => $normalizedPhone, 'password' => $request->password, 'status' => 0])) {
       // if successful, then redirect to their intended location
 
 
@@ -215,6 +219,19 @@ class LoginController extends Controller
 
 
 
+
+  /**
+   * Normalize phone for login: trim, Arabic numerals to English, remove leading +.
+   */
+  private function normalizePhone($phone)
+  {
+    $phone = trim((string) $phone);
+    $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    $phone = str_replace($arabic, $english, $phone);
+    $phone = ltrim($phone, '+');
+    return $phone;
+  }
 
   public function storeCart($usrid)
   {

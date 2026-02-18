@@ -41,13 +41,80 @@ $curr = App\Models\Currency::where('is_default','=',1)->first();
 
 <!-- Cart Area Start -->
 <section class="cartpage">
+  <style>
+    .cartpage { overflow-x: hidden; }
+    .cartpage .container { max-width: 100%; }
+    @media (max-width: 767px) {
+      .cartpage .cart-table-mobile .cart-mobile-card {
+        display: block;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: #fff;
+      }
+      .cartpage .cart-table-mobile .cart-mobile-card .cart-mobile-row { margin-bottom: 0.5rem; }
+      .cartpage .cart-table-mobile .cart-mobile-card .cart-mobile-product img { max-width: 80px; height: auto; }
+      .cartpage .cart-table-mobile .cart-mobile-card .cart-mobile-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    }
+  </style>
   <div class="container">
     <div class="row">
       <div class="col-lg-8">
         <div class="left-area">
-          <div class="cart-table">
+          @include('includes.form-success')
+          {{-- Mobile: stacked cards (no horizontal scroll) --}}
+          <div class="cart-table-mobile d-md-none">
+            @if(Session::has('cart'))
+            @foreach($products as $product)
+            @php
+              $itemKey = $product['item']['id'].$product['size'].$product['color'].str_replace(str_split(' ,'),'',$product['values']);
+            @endphp
+            <div class="cart-mobile-card cremove{{ $itemKey }}">
+              <div class="cart-mobile-row cart-mobile-product">
+                <img src="{{ $product['item']['photo'] ? filter_var($product['item']['photo'], FILTER_VALIDATE_URL) ? $product['item']['photo'] : asset('assets/images/products/'.$product['item']['photo']):asset('assets/images/noimage.png') }}" alt="">
+                <p class="name"><a href="{{ route('front.product', ['slug' => $product['item']['slug'],'lang' => $sign ]) }}">
+                  @if(!$slang) @if($lang->id == 2) {!! strlen($product['item']['name_ar']) > 60 ? substr($product['item']['name_ar'],0,60).'...' : $product['item']['name_ar'] !!} @else {{ strlen($product['item']['name']) > 35 ? substr($product['item']['name'],0,35).'...' : $product['item']['name'] }} @endif
+                  @else @if($slang == 2) {!! strlen($product['item']['name_ar']) > 60 ? substr($product['item']['name_ar'],0,60).'...' : $product['item']['name_ar'] !!} @else {{ strlen($product['item']['name']) > 35 ? substr($product['item']['name'],0,35).'...' : $product['item']['name'] }} @endif
+                  @endif
+                </a></p>
+              </div>
+              <div class="cart-mobile-row cart-mobile-options">
+                @if(!empty($product['size'])) <b>{{ $langg->lang312 }}</b>: {{ $product['item']['measure'] }}{{ $product['size'] }} @endif
+                @if(!empty($product['color'])) <div><b>{{ $langg->lang313 }}</b>: <span style="border: 8px solid #{{ $product['color'] == '' ? 'fff' : $product['color'] }};"></span></div> @endif
+                @if(!empty($product['keys']))
+                  @foreach(array_combine(explode(',', $product['keys']), explode(',', $product['values'])) as $key => $value)
+                    @php $atrr = App\Models\Attribute::where('input_name',$key)->first(); $atrroption = App\Models\AttributeOption::where('name',$value)->first(); @endphp
+                    <b>{{ $atrr ? ($slang == 2 ? ucwords(str_replace('_',' ',$atrr->name_ar)) : ucwords(str_replace('_',' ',$atrr->name))) : ucwords(str_replace('_',' ',$key)) }}</b>: {{ $atrroption ? ($slang == 2 ? $atrroption->name_ar : $atrroption->name) : $value }} <br>
+                  @endforeach
+                @endif
+              </div>
+              <div class="cart-mobile-actions">
+                <p class="product-unit-price mb-0">{{ App\Models\Product::convertPrice($product['item']['price']) }}</p>
+                @if($product['item']['type'] == 'Physical')
+                <div class="qty">
+                  <ul>
+                    <input type="hidden" class="prodid" value="{{ $product['item']['id'] }}">
+                    <input type="hidden" class="itemid" value="{{ $itemKey }}">
+                    <input type="hidden" class="size_qty" value="{{ $product['size_qty'] }}">
+                    <input type="hidden" class="size_price" value="{{ $product['item']['price'] }}">
+                    <li><span class="qtminus1 reducing"><i class="icofont-minus"></i></span></li>
+                    <li><span class="qttotal1" id="qty{{ $itemKey }}">{{ $product['qty'] }}</span></li>
+                    <li><span class="qtplus1 adding"><i class="icofont-plus"></i></span></li>
+                  </ul>
+                </div>
+                @endif
+                @if($product['size_qty']) <input type="hidden" id="stock{{ $itemKey }}" value="{{ $product['size_qty'] }}"> @elseif($product['item']['type'] != 'Physical') <input type="hidden" id="stock{{ $itemKey }}" value="1"> @else <input type="hidden" id="stock{{ $itemKey }}" value="{{ $product['stock'] }}"> @endif
+                <p id="prc{{ $itemKey }}" class="mb-0">{{ App\Models\Product::convertPrice($product['price']) }}</p>
+                <span class="removecart cart-remove" data-class="cremove{{ $itemKey }}" data-href="{{ route('product.cart.remove', $itemKey) }}"><i class="icofont-ui-delete"></i></span>
+              </div>
+            </div>
+            @endforeach
+            @endif
+          </div>
+          {{-- Desktop: table --}}
+          <div class="cart-table cart-table-desktop d-none d-md-block">
             <table class="table">
-              @include('includes.form-success')
               <thead>
                 <tr>
                   <th>{{ $langg->lang122 }}</th>

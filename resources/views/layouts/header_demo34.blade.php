@@ -786,9 +786,9 @@
                     <form class="mloginform" action="{{ route('user.login.submit-34') }}" method="POST">
                         {{ csrf_field() }}
                         <div class="form-group mx-4">
-                            <label for="name-login">{{ $langg->lang182 }}</label>
-                            <input type="text" name="name" class="form-control" id="name-login"
-                                aria-describedby="nameHelp">
+                            <label for="phone-login">{{ $langg->lang184 }}</label>
+                            <input type="tel" name="phone" class="form-control" id="phone-login"
+                                aria-describedby="phoneHelp" required>
                         </div>
                         <div class="form-group mx-4">
                             <label for="password-login">{{ $langg->lang174 }}</label>

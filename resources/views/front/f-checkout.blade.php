@@ -1342,8 +1342,8 @@ $vapulus=  App\Models\PaymentGateway::where('status','=',1)->find(14);
 				            <form id="loginform" action="{{ route('user.login.submit') }}" method="POST">
 				              {{ csrf_field() }}
 				              <div class="form-input">
-				                <input type="text" name="name" placeholder="{{ $langg->lang173 }}" required="">
-				                <i class="icofont-user-alt-5"></i>
+				                <input type="tel" name="phone" placeholder="{{ $langg->lang184 }}" required="">
+				                <i class="icofont-phone"></i>
 				              </div>
 				              <div class="form-input">
 				                <input type="password" class="Password" name="password" placeholder="{{ $langg->lang174 }}" required="">

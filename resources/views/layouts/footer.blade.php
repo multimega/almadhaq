@@ -263,9 +263,9 @@ $Pagesetting = App\Models\Pagesetting::find(1);
 									<form class="mloginform" action="{{ route('user.login.submit') }}" method="POST">
 										{{ csrf_field() }}
 										<div class="form-input">
-											<input type="email" name="email" placeholder="{{ $langg->lang173 }}"
+											<input type="tel" name="phone" placeholder="{{ $langg->lang184 }}"
 												required="">
-											<i class="icofont-user-alt-5"></i>
+											<i class="icofont-phone"></i>
 										</div>
 										<div class="form-input">
 											<input type="password" class="Password" name="password"
@@ -472,8 +472,8 @@ $Pagesetting = App\Models\Pagesetting::find(1);
 				            <form class="mloginform" action="{{ route('user.login.submit') }}" method="POST">
 				              {{ csrf_field() }}
 				              <div class="form-input">
-				                <input type="email" name="email" placeholder="{{ $langg->lang173 }}" required="">
-				                <i class="icofont-user-alt-5"></i>
+				                <input type="tel" name="phone" placeholder="{{ $langg->lang184 }}" required="">
+				                <i class="icofont-phone"></i>
 				              </div>
 				              <div class="form-input">
 				                <input type="password" class="Password" name="password" placeholder="{{ $langg->lang174 }}" required="">

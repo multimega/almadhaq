@@ -1061,8 +1061,8 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
         <form  class="mloginform" action="{{ route('user.login.submit-34') }}" method="POST">
             {{ csrf_field() }}
             <div class="form-group mx-4">
-                <label for="email-login">{{ $langg->lang173 }}</label>
-                <input type="email" name="email" class="form-control" id="email-login" aria-describedby="emailHelp">
+                <label for="phone-login">{{ $langg->lang184 }}</label>
+                <input type="tel" name="phone" class="form-control" id="phone-login" aria-describedby="phoneHelp" required>
             </div>
             <div class="form-group mx-4">
                 <label for="password-login">{{ $langg->lang174 }}</label>
@@ -1374,9 +1374,9 @@ $chunk= App\Models\Service::get()->take(4);
 									<form class="mloginform" action="{{ route('user.login.submit') }}" method="POST">
 										{{ csrf_field() }}
 										<div class="form-input">
-											<input type="email" name="email" placeholder="{{ $langg->lang173 }}"
+											<input type="tel" name="phone" placeholder="{{ $langg->lang184 }}"
 												required="">
-											<i class="icofont-user-alt-5"></i>
+											<i class="icofont-phone"></i>
 										</div>
 										<div class="form-input">
 											<input type="password" class="Password" name="password"
@@ -1583,8 +1583,8 @@ $chunk= App\Models\Service::get()->take(4);
 				            <form class="mloginform" action="{{ route('user.login.submit') }}" method="POST">
 				              {{ csrf_field() }}
 				              <div class="form-input">
-				                <input type="email" name="email" placeholder="{{ $langg->lang173 }}" required="">
-				                <i class="icofont-user-alt-5"></i>
+				                <input type="tel" name="phone" placeholder="{{ $langg->lang184 }}" required="">
+				                <i class="icofont-phone"></i>
 				              </div>
 				              <div class="form-input">
 				                <input type="password" class="Password" name="password" placeholder="{{ $langg->lang174 }}" required="">
