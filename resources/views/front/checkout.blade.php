@@ -172,13 +172,13 @@
                                                     </div>
                                                 </div>
                                                 @if (!Auth::check())
-                                                    <div class="row">
+                                                    {{-- <div class="row">
                                                         <div class="col-lg-12 mt-3">
                                                             <input class="styled-checkbox" id="open-pass" type="checkbox"
                                                                 value="1" name="pass_check">
                                                             <label for="open-pass">{{ $langg->lang749 }}</label>
                                                         </div>
-                                                    </div>
+                                                    </div> --}}
                                                     <div class="row set-account-pass d-none">
                                                         <div class="col-lg-6">
                                                             <input type="password" name="personal_pass" id="personal-pass"
@@ -381,8 +381,8 @@
                                                             @endif
                                                         @endif
 
-                                                        <div id="delivery-info" class="mt-3 text-success fw-bold"
-                                                            style="display: none;"></div>
+                                                        {{-- <div id="delivery-info" class="mt-3 text-success fw-bold"
+                                                            style="display: none;"></div> --}}
 
                                                         <input type="hidden" name="shipping_schedule_id"
                                                             id="shipping_schedule_id">
