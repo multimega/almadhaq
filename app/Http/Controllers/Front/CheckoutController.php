@@ -895,22 +895,21 @@ class CheckoutController extends Controller
 
         $shippingService = new \App\Services\ShippingService();
 
-        try {
-            // Validate the shipping slot is still available
+        if (!empty($request->shipping_schedule_id) && !empty($request->scheduled_delivery_date)) {
+            try {
+                // Validate the shipping slot is still available
+                if (!$shippingService->validateShippingSlot($request->shipping_schedule_id, $request->scheduled_delivery_date)) {
+                    return redirect()->back()->with('unsuccess', "Selected shipping slot is no longer available.");
+                }
 
-            if (!$shippingService->validateShippingSlot($request->shipping_schedule_id, $request->scheduled_delivery_date)) {
-
-                return redirect()->back()->with('unsuccess', "Selected shipping slot is no longer available.");
+                // Reserve the shipping slot
+                $shippingDetails = $shippingService->reserveShippingSlot(
+                    $request->shipping_schedule_id,
+                    $request->scheduled_delivery_date
+                );
+            } catch (\Exception $e) {
+                return redirect()->back()->with('unsuccess', "Error reserving shipping slot: " . $e->getMessage());
             }
-
-            // Reserve the shipping slot
-            $shippingDetails = $shippingService->reserveShippingSlot(
-                $request->shipping_schedule_id,
-                $request->scheduled_delivery_date
-            );
-        } catch (\Exception $e) {
-            dd($e);
-            return redirect()->back()->with('unsuccess', "Error reserving shipping slot:" . $e->getMessage());
         }
 
         $paymentGateway = \App\Models\PaymentGateway::find($request->payment_gateway_id);
@@ -1639,25 +1638,28 @@ class CheckoutController extends Controller
 
         $shippingService = new \App\Services\ShippingService();
 
-        try {
-            // Validate the shipping slot is still available
-            if (!$shippingService->validateShippingSlot($request->shipping_schedule_id, $request->scheduled_delivery_date)) {
+        if (!empty($request->shipping_schedule_id) && !empty($request->scheduled_delivery_date)) {
+            try {
+                // Validate the shipping slot is still available
+                if (!$shippingService->validateShippingSlot($request->shipping_schedule_id, $request->scheduled_delivery_date)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected shipping slot is no longer available.'
+                    ], 400);
+                }
 
+                // Reserve the shipping slot
+                $shippingDetails = $shippingService->reserveShippingSlot(
+                    $request->shipping_schedule_id,
+                    $request->scheduled_delivery_date
+                );
+            } catch (\Exception $e) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Selected shipping slot is no longer available.'
+                    'message' => 'Error reserving shipping slot: ' . $e->getMessage()
                 ], 400);
             }
-
-            // Reserve the shipping slot
-            $shippingDetails = $shippingService->reserveShippingSlot(
-                $request->shipping_schedule_id,
-                $request->scheduled_delivery_date
-            );
-        } catch (\Exception $e) {
-            dd($e);
         }
-
 
         $order = new Order;
         $success_url = action('Front\PaymentController@payreturn');
