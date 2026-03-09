@@ -14,13 +14,14 @@
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-KJG2XH2S');</script>
   <!-- End Google Tag Manager -->
-  <!-- GTM dataLayer: shared helper and logged-in user data (once per page) -->
+  <!-- GTM dataLayer: shared helper and logged-in user data (from View Composer; after session) -->
   <script>
   window.dataLayer = window.dataLayer || [];
   window.siteUserData = {
-    user_email: @json(optional(auth()->user())->email ?? ''),
-    user_phone: @json(optional(auth()->user())->phone ?? '')
+    user_email: @json(isset($siteUserDataForGtm) ? ($siteUserDataForGtm['user_email'] ?? '') : ''),
+    user_phone: @json(isset($siteUserDataForGtm) ? ($siteUserDataForGtm['user_phone'] ?? '') : '')
   };
+  if (window.console && window.console.log) { try { window.console.log('[GTM] siteUserData on load', window.siteUserData); } catch (e) {} }
   function pushDL(eventName, data) {
     var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {

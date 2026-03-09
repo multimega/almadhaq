@@ -652,7 +652,11 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 <!-- GTM dataLayer: define pushDL only if not already defined (e.g. by front layout) -->
 <script>
 window.dataLayer = window.dataLayer || [];
-window.siteUserData = window.siteUserData || { user_email: '', user_phone: '' };
+window.siteUserData = window.siteUserData || {
+  user_email: @json(isset($siteUserDataForGtm) ? ($siteUserDataForGtm['user_email'] ?? '') : ''),
+  user_phone: @json(isset($siteUserDataForGtm) ? ($siteUserDataForGtm['user_phone'] ?? '') : '')
+};
+if (window.console && window.console.log) { try { window.console.log('[GTM] siteUserData (footer_demo10)', window.siteUserData); } catch (e) {} }
 if (typeof pushDL === 'undefined') {
   function pushDL(eventName, data) {
     var payload = { event: eventName, _event: eventName };

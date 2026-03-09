@@ -10,6 +10,7 @@ use App\Models\Category;
 use Carbon\Carbon;
 use App\Models\Pagesetting;
 use Session;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Artisan;
 use Illuminate\Support\Collection;
@@ -81,9 +82,25 @@ class AppServiceProvider extends ServiceProvider
             }
             Session::put('popup' , 1);
             
-          $settings->with('sign', $data->sign);  
-            
-             
+          $settings->with('sign', $data->sign);
+
+            // GTM: logged-in user email/phone for dataLayer (single source; available after session)
+            $siteUserDataForGtm = ['user_email' => '', 'user_phone' => ''];
+            if (Auth::guard('web')->check()) {
+                $user = Auth::guard('web')->user();
+                if ($user && $user->id && (int) $user->id > 0) {
+                    $siteUserDataForGtm['user_email'] = (string) ($user->getAttribute('email') ?? '');
+                    $siteUserDataForGtm['user_phone'] = (string) ($user->getAttribute('phone') ?? '');
+                    if ($siteUserDataForGtm['user_phone'] === '' && method_exists($user, 'orders')) {
+                        $lastOrder = $user->orders()->latest()->first();
+                        if ($lastOrder) {
+                            $siteUserDataForGtm['user_phone'] = (string) ($lastOrder->customer_phone ?? '');
+                        }
+                    }
+                }
+            }
+            $settings->with('siteUserDataForGtm', $siteUserDataForGtm);
+
         });
         
 

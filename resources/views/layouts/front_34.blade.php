@@ -1923,9 +1923,10 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 	(function() {
 		window.dataLayer = window.dataLayer || [];
 		window.siteUserData = window.siteUserData || {
-			user_email: @json(optional(auth()->user())->email ?? ''),
-			user_phone: @json(optional(auth()->user())->phone ?? '')
+			user_email: @json(isset($siteUserDataForGtm) ? ($siteUserDataForGtm['user_email'] ?? '') : ''),
+			user_phone: @json(isset($siteUserDataForGtm) ? ($siteUserDataForGtm['user_phone'] ?? '') : '')
 		};
+		if (window.console && window.console.log) { try { window.console.log('[GTM] siteUserData on load (front_34)', window.siteUserData); } catch (e) {} }
 		function isCheckoutPageUrl(url) {
 			if (!url) return false;
 			try {
