@@ -1922,6 +1922,10 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 	<script>
 	(function() {
 		window.dataLayer = window.dataLayer || [];
+		window.siteUserData = window.siteUserData || {
+			user_email: @json(optional(auth()->user())->email ?? ''),
+			user_phone: @json(optional(auth()->user())->phone ?? '')
+		};
 		function isCheckoutPageUrl(url) {
 			if (!url) return false;
 			try {
@@ -1945,7 +1949,12 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 			if (!link || !link.href) return;
 			if (!isCheckoutPageUrl(link.href)) return;
 			window.dataLayer = window.dataLayer || [];
-			window.dataLayer.push({ 'event': 'start_checkout' });
+			var siteUser = typeof window.siteUserData !== 'undefined' ? window.siteUserData : { user_email: '', user_phone: '' };
+			window.dataLayer.push({
+				'event': 'start_checkout',
+				user_email: siteUser.user_email || '',
+				user_phone: siteUser.user_phone || ''
+			});
 			if (window.console && window.console.log) window.console.log('[GTM] start_checkout pushed before navigation');
 		}
 		document.addEventListener('click', handleCheckoutClick, false);
