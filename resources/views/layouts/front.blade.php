@@ -2806,6 +2806,40 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
     })();
     </script>
     <!-- End GTM Data Layer - Add to Cart -->
+    <!-- GTM Data Layer - Start Checkout (push on click BEFORE navigation to checkout page) -->
+    <script>
+    (function() {
+        function isCheckoutPageUrl(url) {
+            if (!url) return false;
+            try {
+                var a = document.createElement('a');
+                a.href = url;
+                var path = (a.pathname || '').replace(/\/$/, '');
+                if (!path) return false;
+                if (path.indexOf('/checkout/payment') !== -1 || path.indexOf('/checkout/order') !== -1 ||
+                    path.indexOf('/checkout/instamojo') !== -1 || path.indexOf('/checkout/accept') !== -1 ||
+                    path.indexOf('/checkout/nbe') !== -1 || path.indexOf('/checkout/thawani') !== -1 ||
+                    path.indexOf('/checkout/bankmasr') !== -1 || path.indexOf('/checkout/fawry') !== -1 ||
+                    path.indexOf('/checkout/vapulus') !== -1 || path.indexOf('/checkout/notify') !== -1 ||
+                    path.indexOf('/checkout/cancle') !== -1 || path.indexOf('/cancelpayment') !== -1) return false;
+                if (/^\/([a-z]{2}\/)?checkout$/.test(path)) return true;
+                if (/^\/[a-z]{2}\/demo_34\/checkout$/.test(path)) return true;
+                return false;
+            } catch (e) { return false; }
+        }
+        function handleCheckoutClick(e) {
+            var link = e.target && (e.target.closest ? e.target.closest('a') : e.target.tagName === 'A' ? e.target : null);
+            if (!link || !link.href) return;
+            if (!isCheckoutPageUrl(link.href)) return;
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ 'event': 'start_checkout' });
+            if (window.console && window.console.log) window.console.log('[GTM] start_checkout pushed before navigation');
+        }
+        document.addEventListener('click', handleCheckoutClick, false);
+        if (window.console && window.console.log) window.console.log('[GTM] start_checkout click handler bound');
+    })();
+    </script>
+    <!-- End GTM Data Layer - Start Checkout -->
     <script>
        /* $(document).on("click", ".quick-view", function () {
       var $this = $("#quickview");
