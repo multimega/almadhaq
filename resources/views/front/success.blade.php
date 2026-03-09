@@ -276,7 +276,6 @@ $lang = DB::table('languages')->where('is_default', '=', 1)->first();
             'quantity' => isset($item['qty']) ? (int) $item['qty'] : 1
         ];
     }
-    $orderUserEmail = optional($order->user)->email ?? null;
 @endphp
 <script>
 (function(){
@@ -292,14 +291,15 @@ $lang = DB::table('languages')->where('is_default', '=', 1)->first();
     var items = @json($orderPurchaseItems);
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ ecommerce: null });
+    var _siteUser = (typeof window.siteUserData !== 'undefined' && window.siteUserData) ? window.siteUserData : { user_email: '', user_phone: '' };
     var payload = {
         event: 'purchase',
         _event: 'purchase',
         transaction_id: transactionId,
         currency: currency,
         value: value,
-        user_email: @json($orderUserEmail),
-        user_phone: @json($order->customer_phone ?? null),
+        user_email: _siteUser.user_email || '',
+        user_phone: _siteUser.user_phone || '',
         ecommerce: {
             transaction_id: transactionId,
             currency: currency,

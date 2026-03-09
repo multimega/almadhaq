@@ -14,9 +14,13 @@
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-KJG2XH2S');</script>
   <!-- End Google Tag Manager -->
-  <!-- GTM dataLayer: shared helper defined ONCE, available globally before any event calls -->
+  <!-- GTM dataLayer: shared helper and logged-in user data (once per page) -->
   <script>
   window.dataLayer = window.dataLayer || [];
+  window.siteUserData = {
+    user_email: @json(optional(auth()->user())->email ?? ''),
+    user_phone: @json(optional(auth()->user())->phone ?? '')
+  };
   function pushDL(eventName, data) {
     var payload = { event: eventName, _event: eventName };
     if (data && typeof data === 'object') {
@@ -25,6 +29,8 @@
           payload[k] = (data[k] === undefined || data[k] === '') ? null : data[k];
       }
     }
+    payload.user_email = (typeof window.siteUserData !== 'undefined' && window.siteUserData.user_email != null) ? window.siteUserData.user_email : '';
+    payload.user_phone = (typeof window.siteUserData !== 'undefined' && window.siteUserData.user_phone != null) ? window.siteUserData.user_phone : '';
     window.dataLayer.push(payload);
     if (window.console && window.console.log) { try { window.console.log('[DL PUSH]', eventName, payload); } catch (e) {} }
   }
@@ -2731,7 +2737,8 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 				pushDL('sign_up', data);
 			} else {
 				window.dataLayer = window.dataLayer || [];
-				var p = { event: 'sign_up', _event: 'sign_up', user_email: data.user_email != null ? data.user_email : null, user_phone: data.user_phone != null ? data.user_phone : null };
+				var siteUser = typeof window.siteUserData !== 'undefined' ? window.siteUserData : { user_email: '', user_phone: '' };
+				var p = { event: 'sign_up', _event: 'sign_up', user_email: (siteUser.user_email != null && siteUser.user_email !== '') ? siteUser.user_email : (data.user_email != null ? data.user_email : ''), user_phone: (siteUser.user_phone != null && siteUser.user_phone !== '') ? siteUser.user_phone : (data.user_phone != null ? data.user_phone : '') };
 				window.dataLayer.push(p);
 				if (window.console && window.console.log) window.console.log('[DL PUSH] sign_up', p);
 			}
@@ -2776,6 +2783,7 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
             var quantity = 1;
 
             window.dataLayer = window.dataLayer || [];
+            var siteUser = typeof window.siteUserData !== 'undefined' ? window.siteUserData : { user_email: '', user_phone: '' };
             if (typeof pushDL === 'function') {
                 pushDL('add_to_cart', {
                     currency: currency,
@@ -2792,6 +2800,8 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
                 var payload = {
                     event: 'add_to_cart',
                     _event: 'add_to_cart',
+                    user_email: siteUser.user_email || '',
+                    user_phone: siteUser.user_phone || '',
                     currency: currency,
                     value: price * quantity,
                     items: [{ item_id: product_id, item_name: product_name || null, item_category: product_category || null, price: price, quantity: quantity }]
@@ -2832,7 +2842,12 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
             if (!link || !link.href) return;
             if (!isCheckoutPageUrl(link.href)) return;
             window.dataLayer = window.dataLayer || [];
-            window.dataLayer.push({ 'event': 'start_checkout' });
+            var siteUser = typeof window.siteUserData !== 'undefined' ? window.siteUserData : { user_email: '', user_phone: '' };
+            window.dataLayer.push({
+                'event': 'start_checkout',
+                user_email: siteUser.user_email || '',
+                user_phone: siteUser.user_phone || ''
+            });
             if (window.console && window.console.log) window.console.log('[GTM] start_checkout pushed before navigation');
         }
         document.addEventListener('click', handleCheckoutClick, false);

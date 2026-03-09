@@ -652,6 +652,7 @@ if($features[4]->status == 1 && $features[4]->active == 1 ){
 <!-- GTM dataLayer: define pushDL only if not already defined (e.g. by front layout) -->
 <script>
 window.dataLayer = window.dataLayer || [];
+window.siteUserData = window.siteUserData || { user_email: '', user_phone: '' };
 if (typeof pushDL === 'undefined') {
   function pushDL(eventName, data) {
     var payload = { event: eventName, _event: eventName };
@@ -661,6 +662,8 @@ if (typeof pushDL === 'undefined') {
           payload[k] = (data[k] === undefined || data[k] === '') ? null : data[k];
       }
     }
+    payload.user_email = (typeof window.siteUserData !== 'undefined' && window.siteUserData.user_email != null) ? window.siteUserData.user_email : '';
+    payload.user_phone = (typeof window.siteUserData !== 'undefined' && window.siteUserData.user_phone != null) ? window.siteUserData.user_phone : '';
     window.dataLayer.push(payload);
     if (window.console && window.console.log) { try { window.console.log('[DL PUSH]', eventName, payload); } catch (e) {} }
   }
@@ -734,6 +737,7 @@ if (typeof pushDL === 'undefined') {
         var quantity = 1;
 
         window.dataLayer = window.dataLayer || [];
+        var siteUser = typeof window.siteUserData !== 'undefined' ? window.siteUserData : { user_email: '', user_phone: '' };
         if (typeof pushDL === 'function') {
             pushDL('add_to_cart', {
                 currency: currency,
@@ -750,6 +754,8 @@ if (typeof pushDL === 'undefined') {
             var payload = {
                 event: 'add_to_cart',
                 _event: 'add_to_cart',
+                user_email: siteUser.user_email || '',
+                user_phone: siteUser.user_phone || '',
                 currency: currency,
                 value: price * quantity,
                 items: [{ item_id: product_id, item_name: product_name || null, item_category: product_category || null, price: price, quantity: quantity }]

@@ -66,8 +66,11 @@
     <script>
         window.dataLayer = window.dataLayer || [];
         dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
+        var _siteUser = (typeof window.siteUserData !== 'undefined' && window.siteUserData) ? window.siteUserData : { user_email: '', user_phone: '' };
         dataLayer.push({
             event: "begin_checkout",
+            user_email: _siteUser.user_email || '',
+            user_phone: _siteUser.user_phone || '',
             ecommerce: {
                 currency: "{{ $curr->name ?? 'USD' }}",
                 value: {{ Session::has('cart') ? Session::get('cart')->totalPrice * $curr->value : 0 }},
