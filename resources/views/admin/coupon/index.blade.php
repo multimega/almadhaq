@@ -46,6 +46,7 @@ $sign = App\Models\Currency::where('is_default',1)->first();
 									                        <th>{{ __('Type') }}</th>
 									                        <th>{{ __('Amount') }}</th>
 									                        <th>{{ __('Limit') }}({{$sign->sign}})</th>
+									                        <th>{{ __('Max total uses') }}</th>
 									                        <th>{{ __('Used') }}</th>
 									                         <th>{{ __('For') }}</th>
 									                         <th>{{ __('Expire') }}</th>
@@ -146,6 +147,7 @@ $sign = App\Models\Currency::where('is_default',1)->first();
                         { data: 'type', name: 'type' },
                         { data: 'price', name: 'price' },
                         { data: 'limited', name: 'limited' },
+                        { data: 'max_total_uses', name: 'max_total_uses' },
                         { data: 'used', name: 'used' },
                         { data: 'user_id', name: 'user_id' },
                         { data: 'end_date', name: 'end_date' },

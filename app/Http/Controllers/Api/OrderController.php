@@ -649,16 +649,7 @@ class OrderController extends Controller
                 if (!empty($request->coupon)) {
                     $coupon = Coupon::where('code', $request->coupon)->where('status', 1)->first();
                     if (!empty($coupon)) {
-                        $coupon->used++;
-                        if ($coupon->times != null) {
-                            $i = (int)$coupon->times;
-                            $i--;
-                            $coupon->times = (string)$i;
-                            if ((int)$i == 0) {
-                                $coupon->status = 0;
-                            }
-                        }
-                        $coupon->update();
+                        $coupon->recordOrderRedemption();
                     }
 
 

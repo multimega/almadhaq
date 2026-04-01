@@ -36,6 +36,19 @@ class CouponController extends Controller
         $this->middleware('auth:admin');
     }
 
+    /**
+     * usage_limit_mode: 0 = unlimited, 1 = limited to max_total_uses (global, all users).
+     */
+    protected function normalizedMaxTotalUses(Request $request): ?int
+    {
+        if ($request->input('usage_limit_mode', '0') !== '1') {
+            return null;
+        }
+        $n = (int) $request->input('max_total_uses', 0);
+
+        return $n >= 1 ? $n : 1;
+    }
+
     //*** JSON Request
     public function datatables()
     {
@@ -56,6 +69,8 @@ class CouponController extends Controller
                 $sign = Currency::where('is_default', 1)->first();
                 $limit = $data->limited < 0 ? $data->limited . ' %' : $data->limited . ' ' . $sign->sign;
                 return $limit;
+            })->editColumn('max_total_uses', function (Coupon $data) {
+                return $data->max_total_uses === null ? __('Unlimited') : (string) $data->max_total_uses;
             })->editColumn('user_id', function (Coupon $data) {
                 $name = User::select('name')->where('id', $data->user_id)->first();
                 $user = $data->user_id == null ? 'For All' : (!empty($name) ? $name->name : "User Deleted");
@@ -329,7 +344,8 @@ class CouponController extends Controller
         $input['rand'] = rand(123, 999999);
         $input['start_date'] = Carbon::parse($input['start_date'])->format('Y-m-d');
         $input['end_date'] = Carbon::parse($input['end_date'])->format('Y-m-d');
-
+        $input['max_total_uses'] = $this->normalizedMaxTotalUses($request);
+        $input['times'] = null;
 
         $data->fill($input)->save();
         //--- Logic Section Ends
@@ -497,7 +513,8 @@ class CouponController extends Controller
         }
         $input['start_date'] = Carbon::parse($input['start_date'])->format('Y-m-d');
         $input['end_date'] = Carbon::parse($input['end_date'])->format('Y-m-d');
-
+        $input['max_total_uses'] = $this->normalizedMaxTotalUses($request);
+        $input['times'] = null;
 
         if ($request->what != 'free_shipping') {
 
@@ -511,6 +528,14 @@ class CouponController extends Controller
 
                 ], 200);
             }
+        }
+
+        $maxUses = $input['max_total_uses'] ?? null;
+        if ($maxUses !== null && (int) $maxUses < (int) $data->used) {
+            return response()->json([
+                'status'  => true,
+                'msg'   => 'Max total uses cannot be less than the number of times this coupon was already used (' . (int) $data->used . ').',
+            ], 200);
         }
 
         $data->update($input);

@@ -498,16 +498,7 @@ class TabbyController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 

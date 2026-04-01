@@ -209,13 +209,7 @@ class MollyController extends Controller
 
             if ($paypal_data['coupon_id'] != "") {
                 $coupon = Coupon::findOrFail($paypal_data['coupon_id']);
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
             foreach ($cart->items as $prod) {
                 $x = (string)$prod['stock'];

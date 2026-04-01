@@ -158,13 +158,7 @@ class PaystackController extends Controller
         $notification->save();
         if ($request->coupon_id != "") {
             $coupon = Coupon::findOrFail($request->coupon_id);
-            $coupon->used++;
-            if ($coupon->times != null) {
-                $i = (int)$coupon->times;
-                $i--;
-                $coupon->times = (string)$i;
-            }
-            $coupon->update();
+            $coupon->recordOrderRedemption();
         }
 
         foreach ($cart->items as $prod) {

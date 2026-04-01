@@ -484,10 +484,8 @@ class CartController extends Controller
             } else {
                 $curr = Currency::where('is_default', '=', 1)->first();
             }
-            if ($coupon->times != null) {
-                if ($coupon->times == "0") {
-                    return response()->json(0);
-                }
+            if ($coupon->hasReachedMaxUses()) {
+                return response()->json(0);
             }
             if (($coupon->limited * $curr->value) > $total) {
 
@@ -592,10 +590,8 @@ class CartController extends Controller
             }
 
 
-            if ($coupon->times != null) {
-                if ($coupon->times == "0") {
-                    return response()->json(0);
-                }
+            if ($coupon->hasReachedMaxUses()) {
+                return response()->json(0);
             }
 
 
@@ -710,10 +706,8 @@ class CartController extends Controller
             }
 
 
-            if ($coupon->times != null) {
-                if ($coupon->times == "0") {
-                    return response()->json(0);
-                }
+            if ($coupon->hasReachedMaxUses()) {
+                return response()->json(0);
             }
 
 
@@ -794,10 +788,8 @@ class CartController extends Controller
             }
 
 
-            if ($coupon->times != null) {
-                if ($coupon->times == "0") {
-                    return response()->json(0);
-                }
+            if ($coupon->hasReachedMaxUses()) {
+                return response()->json(0);
             }
 
 

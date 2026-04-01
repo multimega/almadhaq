@@ -50,7 +50,8 @@ class CouponController extends Controller {
         $coupon->photo = $point->photo;
        // $coupon->rand = rand();
         $coupon->limited = $point->limited;
-        $coupon->times = $point->times;
+        $coupon->max_total_uses = ($point->times !== null && $point->times !== '') ? (int) $point->times : null;
+        $coupon->times = null;
         
         $coupon->start_date = date('Y-m-d', strtotime($mytime)) ;
         $coupon->end_date = date('Y-m-d', strtotime($mytime. ' + '.$point->days.' days')) ;
@@ -410,12 +411,9 @@ class CouponController extends Controller {
           
                 $curr = Currency::find(auth()->user()->currency);
             
-        if($coupon->times != null)
+        if($coupon->hasReachedMaxUses())
         {
-            if($coupon->times == "0")
-            {
                 return response()->json(array('status' => 'false','message'=>'cant use coupon anymore'));                
-            }
         } 
         if(($coupon->limited * $curr->value ) > $total)
         {

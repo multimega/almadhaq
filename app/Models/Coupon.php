@@ -6,8 +6,32 @@ use Illuminate\Database\Eloquent\Model;
 
 class Coupon extends Model
 {
-    protected $fillable = ['code', 'type', 'price', 'times', 'start_date', 'end_date', 'limited', 'user_id', 'photo', 'what'];
+    protected $fillable = ['code', 'type', 'price', 'times', 'max_total_uses', 'start_date', 'end_date', 'limited', 'user_id', 'photo', 'what'];
     public $timestamps = false;
+
+    /**
+     * Whether this coupon has reached its global redemption limit (all users combined).
+     */
+    public function hasReachedMaxUses(): bool
+    {
+        if ($this->max_total_uses === null) {
+            return false;
+        }
+
+        return (int) $this->used >= (int) $this->max_total_uses;
+    }
+
+    /**
+     * Increment usage after a successful order and deactivate when the cap is reached.
+     */
+    public function recordOrderRedemption(): void
+    {
+        self::where('id', $this->id)->increment('used');
+        $fresh = self::find($this->id);
+        if ($fresh && $fresh->max_total_uses !== null && (int) $fresh->used >= (int) $fresh->max_total_uses) {
+            $fresh->update(['status' => 0]);
+        }
+    }
 
     public function upload($name, $file, $oldname)
     {

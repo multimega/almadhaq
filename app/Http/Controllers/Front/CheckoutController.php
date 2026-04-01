@@ -1081,16 +1081,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -1823,16 +1814,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -2261,13 +2243,7 @@ class CheckoutController extends Controller
         $notification->save();
         if ($request->coupon_id != "") {
             $coupon = Coupon::findOrFail($request->coupon_id);
-            $coupon->used++;
-            if ($coupon->times != null) {
-                $i = (int)$coupon->times;
-                $i--;
-                $coupon->times = (string)$i;
-            }
-            $coupon->update();
+            $coupon->recordOrderRedemption();
 
             /* Free Product */
             $coupon1 = Free::findOrFail($request->coupon_id);
@@ -2699,16 +2675,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -3247,16 +3214,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -3722,16 +3680,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -4216,16 +4165,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -4554,16 +4494,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -4955,16 +4886,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -5394,16 +5316,7 @@ class CheckoutController extends Controller
         if ($request->coupon_id != "") {
             $coupon = Coupon::find($request->coupon_id);
             if (!empty($coupon)) {
-                $coupon->used++;
-                if ($coupon->times != null) {
-                    $i = (int)$coupon->times;
-                    $i--;
-                    $coupon->times = (string)$i;
-                    if ((int)$i == 0) {
-                        $coupon->status = 0;
-                    }
-                }
-                $coupon->update();
+                $coupon->recordOrderRedemption();
             }
 
 
@@ -5745,13 +5658,7 @@ class CheckoutController extends Controller
         $notification->save();
         if ($request->coupon_id != "") {
             $coupon = Coupon::findOrFail($request->coupon_id);
-            $coupon->used++;
-            if ($coupon->times != null) {
-                $i = (int)$coupon->times;
-                $i--;
-                $coupon->times = (string)$i;
-            }
-            $coupon->update();
+            $coupon->recordOrderRedemption();
 
             /* Free Product */
             $coupon1 = Free::findOrFail($request->coupon_id);
@@ -6074,13 +5981,7 @@ class CheckoutController extends Controller
         $notification->save();
         if ($request->coupon_id != "") {
             $coupon = Coupon::findOrFail($request->coupon_id);
-            $coupon->used++;
-            if ($coupon->times != null) {
-                $i = (int)$coupon->times;
-                $i--;
-                $coupon->times = (string)$i;
-            }
-            $coupon->update();
+            $coupon->recordOrderRedemption();
 
             /* Free Product */
             $coupon1 = Free::findOrFail($request->coupon_id);
@@ -6396,13 +6297,7 @@ class CheckoutController extends Controller
         $notification->save();
         if ($request->coupon_id != "") {
             $coupon = Coupon::findOrFail($request->coupon_id);
-            $coupon->used++;
-            if ($coupon->times != null) {
-                $i = (int)$coupon->times;
-                $i--;
-                $coupon->times = (string)$i;
-            }
-            $coupon->update();
+            $coupon->recordOrderRedemption();
 
             /* Free Product */
             $coupon1 = Free::findOrFail($request->coupon_id);

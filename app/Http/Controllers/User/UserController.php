@@ -261,7 +261,8 @@ class UserController extends Controller
         $coupon->photo = $point->photo;
         $coupon->rand = rand();
         $coupon->limited = $point->limited;
-        $coupon->times = $point->times;
+        $coupon->max_total_uses = ($point->times !== null && $point->times !== '') ? (int) $point->times : null;
+        $coupon->times = null;
 
         $coupon->start_date = date('Y-m-d', strtotime($mytime));
         $coupon->end_date = date('Y-m-d', strtotime($mytime . ' + ' . $point->days . ' days'));

@@ -237,13 +237,7 @@ class PaymentController extends Controller
         $notification->save();
         if ($request->coupon_id != "") {
             $coupon = Coupon::findOrFail($request->coupon_id);
-            $coupon->used++;
-            if ($coupon->times != null) {
-                $i = (int)$coupon->times;
-                $i--;
-                $coupon->times = (string)$i;
-            }
-            $coupon->update();
+            $coupon->recordOrderRedemption();
 
             /* Free Product */
             $coupon1 = Free::findOrFail($request->coupon_id);

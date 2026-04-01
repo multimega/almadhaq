@@ -211,33 +211,33 @@ $sign = App\Models\Currency::where('is_default',1)->first();
                           </div>
                         </div>
 
-                        <div class="row" id="qty_row">
+                        <div class="row" id="usage_limit_row">
                           <div class="col-lg-4">
                             <div class="left-area">
-                                <h4 class="heading">{{ __('Quantity') }} *</h4>
-                                <p class="sub-heading">{{ $langg->lang971 }}</p>
+                                <h4 class="heading">{{ __('Max total uses') }} *</h4>
+                                <p class="sub-heading">{{ __('Across all customers; order completes count as one use.') }}</p>
                             </div>
                           </div>
                           <div class="col-lg-7">
-                              <select id="times">
-                                <option value="0">{{ __('Unlimited') }}</option>
-                                <option value="1">{{ __('Limited') }}</option>
-                              </select>
+                            <select id="usage_limit_mode" name="usage_limit_mode">
+                              <option value="0">{{ __('Unlimited') }}</option>
+                              <option value="1">{{ __('Limited') }}</option>
+                            </select>
                           </div>
                         </div>
 
-                        <div class="row hidden">
+                        <div class="row hidden" id="usage_limit_value_row">
                           <div class="col-lg-4">
                             <div class="left-area">
-                                <h4 class="heading">{{ __('Value') }} *</h4>
-                                <p class="sub-heading">{{ $langg->lang971 }}</p>
+                              <h4 class="heading">{{ __('Number of uses') }} *</h4>
+                              <p class="sub-heading">{{ $langg->lang971 }}</p>
                             </div>
                           </div>
                           <div class="col-lg-7">
-                            <input type="text" class="input-field less-width" name="times" placeholder="{{ __('Enter Value') }}" value=""><span></span>
+                            <input type="number" class="input-field less-width" name="max_total_uses" min="1" step="1" placeholder="{{ __('e.g. 3') }}" value="">
                           </div>
                         </div>
-
+                        
                          <div class="row">
                           <div class="col-lg-4">
                             <div class="left-area">
@@ -395,25 +395,22 @@ $sign = App\Models\Currency::where('is_default',1)->first();
             $('.subcat').css('display','none');  
             $('.products').css('display','none'); 
             $('#type_row').css('display','none'); 
-            $('#qty_row').css('display','none'); 
       } 
      
     });
 
 
-{{-- Coupon Qty --}}
-
-  $(document).on("change", "#times" , function(){
+{{-- Coupon usage cap --}}
+  $(document).on("change", "#usage_limit_mode", function(){
     var val = $(this).val();
-    var selector = $(this).parent().parent().next();
-    if(val == 1){
-    selector.css('display','flex');
+    var row = $('#usage_limit_value_row');
+    if(val == "1"){
+      row.css('display','flex');
+    } else {
+      row.find('input[name=max_total_uses]').val("");
+      row.hide();
     }
-    else{
-    selector.find('input').val("");
-    selector.hide();    
-    }
-});
+  });
 
 </script>
 
