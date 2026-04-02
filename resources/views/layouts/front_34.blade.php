@@ -552,7 +552,27 @@ $prods = App\Models\Product::whereIn('id',$pro_id)->get();
         padding: 10px;
         border-bottom: 1px solid #ccc;
     }
-    
+
+    /*
+     * Product grids (category, etc.): theme shows .paction on :hover only.
+     * On touch, the first tap applies hover; the second fires click — fix by
+     * keeping actions visible when hover is unavailable or on small screens.
+     */
+    @media (hover: none), (max-width: 991.98px) {
+        .product-box .product-img .paction,
+        .product-box .product-img .btn-cart-out-of-stock {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            transform: none !important;
+            z-index: 3;
+        }
+    }
+    .product-box .product-img .btn-add-cart.add-to-cart.paction,
+    .product-box .product-img .paction.add-wishlist {
+        touch-action: manipulation;
+    }
+
 </style>
 </head>
 <script src="{{asset('assets/front/js/jquery.js')}}"></script>
